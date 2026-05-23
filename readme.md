@@ -25,6 +25,32 @@ discovery, overengineering, or ignoring validation.
 Use the skill folder directly from an agent that supports local skill folders,
 or copy the relevant adapter into the target agent's expected guidance location.
 
+## One-Line Install
+
+Codex:
+
+```sh
+git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent codex --force
+```
+
+Claude Code:
+
+```sh
+git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent claude-code --force
+```
+
+OpenCode:
+
+```sh
+git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent opencode --force
+```
+
+Custom location:
+
+```sh
+git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --target ~/path/to/skills/the-polyglot-protocol --force
+```
+
 Validate the project:
 
 ```sh

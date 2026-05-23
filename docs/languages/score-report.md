@@ -22,6 +22,7 @@ python scripts/validate-language-guidance.py
 - LLM coding guardrails: present
 - Filename policy: kebab-case, no dates
 - Workspace validation: present
+- One-line installer: present
 
 ## Notes
 
