@@ -11,14 +11,15 @@ kebab-case and do not include dates.
 4. `## Generation Rules`
 5. `## Source Documentation And Comments`
 6. `## Test-First Red Green Refactor`
-7. `## Project Discovery And Structure`
-8. `## Design Patterns And Architecture`
-9. `## Algorithmic Complexity And Dynamic Programming`
-10. `## Senior Architecture Decisions`
-11. `## Concurrency Parallelism And Hardware Acceleration`
-12. `## Senior Decision Checklist`
-13. `## Final Senior Guardrails`
-14. `## LLM Coding Guardrails`
+7. `## Refactoring Playbook`
+8. `## Project Discovery And Structure`
+9. `## Design Patterns And Architecture`
+10. `## Algorithmic Complexity And Dynamic Programming`
+11. `## Senior Architecture Decisions`
+12. `## Concurrency Parallelism And Hardware Acceleration`
+13. `## Senior Decision Checklist`
+14. `## Final Senior Guardrails`
+15. `## LLM Coding Guardrails`
 
 ## Writing Rules
 
@@ -27,4 +28,5 @@ kebab-case and do not include dates.
 - State when the language should not be used for a task.
 - Include performance, security, testing, and rollback concerns.
 - Require red-green-refactor for bug fixes and behavior changes.
+- Include the 10 standard refactoring playbook items.
 - Avoid generic advice that could apply to any language without adjustment.

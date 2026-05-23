@@ -52,6 +52,7 @@ REQUIRED_SECTIONS = [
     "## Generation Rules",
     "## Source Documentation And Comments",
     "## Test-First Red Green Refactor",
+    "## Refactoring Playbook",
     "## Project Discovery And Structure",
     "## Design Patterns And Architecture",
     "## Algorithmic Complexity And Dynamic Programming",
@@ -86,6 +87,19 @@ FINAL_LABELS = [
     "Time Date Locale And Money",
     "Resource Lifecycle",
     "Build And Packaging Strategy",
+]
+
+REFACTORING_LABELS = [
+    "Characterization Refactor",
+    "Extract And Isolate",
+    "Rename For Domain Clarity",
+    "Simplify Control Flow",
+    "Dead Code And Dependency Pruning",
+    "Boundary Refactor",
+    "Performance Refactor",
+    "Compatibility-Preserving Migration",
+    "Concurrency Refactor",
+    "Architecture De-Escalation",
 ]
 
 
@@ -129,7 +143,7 @@ def main() -> int:
             count = text.count(section)
             if count != 1:
                 errors.append(f"{name}: expected one {section!r}, found {count}")
-        for label in SENIOR_LABELS + FINAL_LABELS:
+        for label in SENIOR_LABELS + FINAL_LABELS + REFACTORING_LABELS:
             if label not in text:
                 errors.append(f"{name}: missing label {label!r}")
 

@@ -117,6 +117,10 @@ The audit log must contain:
   upgrades. Read the relevant file under `docs/languages/` before generating
   language-specific code. Default operational scripts to Python unless the
   repository already standardizes on another script runner.
+- For refactor requests, read the relevant language file's
+  `## Refactoring Playbook` and identify which playbook item applies before
+  editing code. If more than one applies, keep each item scoped and verified
+  separately.
 - Run `python scripts/validate-workspace.py` after guidance or documentation
   changes unless the file is unavailable because the task is outside this
   workspace.
@@ -154,6 +158,8 @@ Each planning artifact must include:
 - affected files, systems, URLs, and environments
 - required skills and external references
 - validation, rollback, and risk notes
+- relevant language refactoring playbook item when the request is a refactor or
+  includes refactoring
 - baseline URL selection and KPI capture plan when Lighthouse applies
 - Docker, Lighthouse, CloakBrowser, and deployment expectations
 

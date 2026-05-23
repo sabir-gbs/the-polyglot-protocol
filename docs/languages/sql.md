@@ -39,6 +39,19 @@ the smallest change to pass, then refactor with tests green. If a test cannot be
 added, document the manual verification and why automated coverage is not
 practical.
 
+## Refactoring Playbook
+
+- **Characterization Refactor**: capture current behavior with tests before changing legacy, risky, or poorly understood code.
+- **Extract And Isolate**: extract functions, modules, classes, or components only when it reduces duplication, isolates an external system, or clarifies a real boundary.
+- **Rename For Domain Clarity**: rename symbols when names hide intent; keep scope narrow and update tests, docs, and public references deliberately.
+- **Simplify Control Flow**: flatten nested conditionals, remove duplicated branches, and replace clever logic with direct readable logic.
+- **Dead Code And Dependency Pruning**: remove unused code, imports, flags, config, assets, and dependencies only after search and test evidence.
+- **Boundary Refactor**: move validation, serialization, authorization, persistence, and external API calls to explicit boundaries.
+- **Performance Refactor**: optimize for lower complexity, lower allocation, or better I/O only with a measured bottleneck or obvious pathological cost.
+- **Compatibility-Preserving Migration**: add compatibility first, migrate callers or data, verify both paths, then remove the old path in a separate cleanup.
+- **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
+- **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
+
 ## Project Discovery And Structure
 
 Before generating SQL, identify the database dialect, migration tool, schema

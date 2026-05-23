@@ -18,6 +18,7 @@ python scripts/validate-language-guidance.py
 - Operational language governance files: `11/11`
 - Required language sections: present
 - Test-first red-green-refactor sections: present
+- Refactoring playbook sections: present
 - Senior decision labels: present
 - Final senior guardrail labels: present
 - LLM coding guardrails: present
