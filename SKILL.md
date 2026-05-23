@@ -19,7 +19,12 @@ or more programming languages.
    language-specific code.
 6. For Python scripts, also read `docs/languages/python/python.md`.
 7. For TypeScript or JavaScript, also read `docs/languages/typescript/typescript.md`.
-8. Run validation when this skill folder is available:
+8. After code generation, audit the entire generated codebase against this
+   protocol and `docs/languages/scoring-rubric.md`. Report every criterion with
+   its score, remediate all gaps until every criterion reaches `10/10`, and
+   report the final total score. If a criterion cannot reach `10/10`, document
+   the blocker, evidence, and follow-up requirement before completion.
+9. Run validation when this skill folder is available:
 
 ```sh
 python scripts/validate-workspace.py
@@ -39,6 +44,9 @@ python scripts/validate-workspace.py
   sources before pinning or upgrading.
 - Do not invent APIs, configuration keys, package names, services, flags, or
   framework behavior.
+- Generated code is not complete until a whole-codebase protocol audit reaches
+  `100/100` across the rubric, or a documented blocker explains why that target
+  is impossible in the current scope.
 - Treat unsupported Docker, Lighthouse, browser, deployment, Git, or CI steps as
   explicit `N/A` items with evidence.
 

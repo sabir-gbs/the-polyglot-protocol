@@ -202,6 +202,31 @@ Score each criterion from `0` to `10` for a total score out of `100`.
   intent versus outcome.
 - Record execution progress in the execution plan itself or in the audit log.
 
+## Post-Codegen Protocol Audit
+
+After generating or changing code, audit the entire affected codebase against
+The Polyglot Protocol before reporting completion.
+
+Use `docs/languages/scoring-rubric.md` as the required final scoring source.
+Score each criterion from `0` to `10`, report every criterion and the final
+total, and target `100/100`.
+
+If any criterion is below `10/10`, fix the gap and rerun the relevant
+verification before the final response. Continue this remediation loop until
+every criterion reaches `10/10`, unless an objective blocker prevents it.
+
+When a criterion cannot reach `10/10`, record the blocker in the audit log with:
+
+- criterion name and score
+- reason the score cannot be improved in the current scope
+- evidence from local files, commands, or primary documentation
+- follow-up requirement if scope, access, dependency, environment, or user
+  approval changes
+
+The final report must include the criterion-level score table, total score,
+validation commands, and all justified `N/A` items. Do not claim `100/100`
+unless every criterion is scored `10/10` and verification evidence supports it.
+
 ## Lighthouse Baseline And Regression Control
 
 Before executing new code, establish a Lighthouse baseline for the local Docker
