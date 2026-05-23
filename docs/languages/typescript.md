@@ -1,7 +1,7 @@
 # TypeScript
 
 Use TypeScript for new JavaScript-family product code unless the existing
-project is JavaScript-only. The root `TYPESCRIPT.md` is the authoritative deep
+project is JavaScript-only. `typescript/typescript.md` is the authoritative deep
 guide.
 
 ## Runtime And Package Management
@@ -35,6 +35,13 @@ package APIs. Document runtime contracts, generic constraints, side effects,
 thrown errors, and compatibility assumptions. Use comments for non-obvious
 state transitions, browser/platform workarounds, and security decisions; avoid
 comments that repeat names or obvious control flow.
+
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
 
 ## Project Discovery And Structure
 

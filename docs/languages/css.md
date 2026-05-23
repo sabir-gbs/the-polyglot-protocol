@@ -31,6 +31,13 @@ requirements, and intentional specificity. Group related rules with clear
 section comments only when the stylesheet is large enough to benefit. Do not add
 comments that simply restate selectors or property names.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating CSS, inspect existing styling approach, tokens, breakpoints,

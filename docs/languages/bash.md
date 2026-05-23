@@ -30,6 +30,13 @@ privilege requirements, and destructive side effects at the top of reusable
 scripts. Comment non-obvious quoting, traps, subshells, sudo boundaries, and
 platform-specific behavior. Avoid comments that merely translate a command name.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating shell code, inspect existing scripts, shebangs, ShellCheck

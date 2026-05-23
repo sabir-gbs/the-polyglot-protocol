@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ALLOWED_UPPERCASE = {"AGENTS.md", "CLAUDE.md", "PYTHON.md", "SKILL.md", "TYPESCRIPT.md"}
+ALLOWED_UPPERCASE = {"AGENTS.md", "CLAUDE.md", "SKILL.md"}
 ADAPTER_READMES = {
     ROOT / "adapters" / "codex" / "readme.md",
     ROOT / "adapters" / "claude-code" / "readme.md",

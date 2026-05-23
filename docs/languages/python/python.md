@@ -1,8 +1,8 @@
-# PYTHON.md
+# Python Deep Guide
 
 This document constrains all Python code generation for any project that references it. Read it before writing or editing Python code. The goal is production-quality Python that is correct, typed, tested, secure, maintainable, efficient, and portable across Windows, macOS, Ubuntu, and Fedora.
 
-For cross-language decisions, read `language-guidelines.md` first. Python remains
+For cross-language decisions, read `../../language-guidelines.md` first. Python remains
 the default language for operational scripts, automation, audits, migrations,
 file processing, and glue code unless an existing repository toolchain is a
 clearer supported path.

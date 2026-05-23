@@ -33,6 +33,13 @@ lifetime, exception guarantees, threading guarantees, and ABI expectations. Use
 comments for invariants, synchronization, custom allocators, and unsafe casts.
 Avoid comments that duplicate type names or obvious RAII behavior.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating C++, inspect build files, standard level, compiler flags,

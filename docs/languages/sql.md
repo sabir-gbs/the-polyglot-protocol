@@ -32,6 +32,13 @@ expected runtime for large tables. Document views, complex queries, non-obvious
 indexes, constraints, and dialect-specific behavior. Avoid comments that simply
 repeat table or column names.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating SQL, identify the database dialect, migration tool, schema

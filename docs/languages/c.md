@@ -32,6 +32,13 @@ expectations, thread-safety, and error returns. Comment invariants, allocation
 ownership, buffer sizes, aliasing assumptions, and intentional undefined-behavior
 avoidance. Do not clutter straightforward local logic with restatement comments.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating C, inspect build files, compiler flags, target platforms,

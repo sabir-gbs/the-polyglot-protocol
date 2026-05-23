@@ -1,4 +1,4 @@
-# TYPESCRIPT.md
+# TypeScript And JavaScript Deep Guide
 
 This document constrains all TypeScript and JavaScript code generation for any
 project that references it. Read it before writing or editing TypeScript,
@@ -7,7 +7,7 @@ correct, typed, tested, secure, maintainable, efficient, portable, and explicit
 about runtime behavior across Node.js, browsers, servers, workers, desktop apps,
 and mobile-adjacent systems.
 
-For cross-language decisions, read `language-guidelines.md` first. TypeScript is
+For cross-language decisions, read `../../language-guidelines.md` first. TypeScript is
 preferred for new JavaScript-family product code, but operational scripts still
 default to Python unless this repository already standardizes on Node-based
 automation.
@@ -1563,7 +1563,7 @@ Findings:
   Evidence: <file:line or command output>
   Confidence: <High|Medium|Low>
   Why it matters: <risk>
-  Standard: <section of TYPESCRIPT.md>
+  Standard: <section of docs/languages/typescript/typescript.md>
   Suggested fix: <short non-edit recommendation>
 
 Strengths:

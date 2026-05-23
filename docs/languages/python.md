@@ -1,7 +1,7 @@
 # Python
 
 Use Python as the default language for operational scripts, automation, audits,
-migrations, file processing, and glue code. The root `PYTHON.md` is the
+migrations, file processing, and glue code. `python/python.md` is the
 authoritative deep guide.
 
 ## Runtime And Environment
@@ -36,6 +36,13 @@ non-obvious exceptions. Keep docstrings focused on contract, arguments, return
 value, side effects, and failure modes. Use inline comments only for intent,
 invariants, security decisions, portability constraints, or complex algorithms;
 do not restate what the code already says.
+
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
 
 ## Project Discovery And Structure
 

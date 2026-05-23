@@ -32,6 +32,13 @@ tradeoffs, and theme integration boundaries. Document schema settings with clear
 labels and info text. Avoid leaving commented-out markup or comments that expose
 internal notes to rendered HTML.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Liquid, inspect theme structure, JSON templates, sections,

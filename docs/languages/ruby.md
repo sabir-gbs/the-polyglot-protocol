@@ -31,6 +31,13 @@ callbacks, and non-obvious blocks. Document parameters, return values,
 exceptions, side effects, and Rails callbacks or metaprogramming. Use comments
 for intent and framework workarounds; avoid restating method names.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Ruby, inspect `Gemfile`, lockfile, Rails or gem structure,

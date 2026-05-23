@@ -32,6 +32,13 @@ properties, events, and library APIs. Document cancellation behavior, exceptions
 nullability, threading, and side effects. Use inline comments for intent,
 workarounds, and non-obvious framework behavior; avoid repeating method names.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating C#, inspect the solution, project files, target framework,

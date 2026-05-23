@@ -32,6 +32,13 @@ functions, errors, feature flags, and examples. Include doctests for important
 APIs when practical. Comment unsafe invariants, ownership subtleties, lifetime
 constraints, concurrency assumptions, and FFI boundaries.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Rust, inspect `Cargo.toml`, workspace layout, features,

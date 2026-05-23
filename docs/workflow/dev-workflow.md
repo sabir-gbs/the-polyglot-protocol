@@ -62,11 +62,11 @@ If one or more prerequisites are missing:
 Apply repository guidance in this order:
 
 1. Direct user request for the current task
-2. `dev-workflow.md`
+2. `docs/workflow/dev-workflow.md`
 3. `AGENTS.md`
 4. `language-guidelines.md`
-5. `PYTHON.md`
-6. `TYPESCRIPT.md`
+5. `docs/languages/python/python.md`
+6. `docs/languages/typescript/typescript.md`
 7. `CLAUDE.md`
 8. Other repository docs and scripts
 
@@ -271,7 +271,7 @@ Score each criterion from `0` to `10` for a total score out of `100`.
 
 ## Guidance-File Audit Loop
 
-When the change touches `dev-workflow.md`, `AGENTS.md`, `CLAUDE.md`, or another
+When the change touches `docs/workflow/dev-workflow.md`, `AGENTS.md`, `CLAUDE.md`, or another
 guidance file, run three guidance-file audit rounds after the edits.
 
 ### Guidance-File Audit Criteria

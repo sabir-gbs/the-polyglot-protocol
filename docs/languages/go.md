@@ -33,6 +33,13 @@ constant, and variable. Start exported comments with the identifier name when
 practical. Document context cancellation, error semantics, concurrency safety,
 and side effects. Use inline comments for invariants and non-obvious algorithms.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Go, inspect `go.mod`, package layout, internal packages,

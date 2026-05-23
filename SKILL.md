@@ -11,14 +11,14 @@ or more programming languages.
 
 ## Required Workflow
 
-1. Read `docs/dev-workflow.md` for the operating process.
+1. Read `docs/workflow/dev-workflow.md` for the operating process.
 2. Read `docs/language-guidelines.md` for language-selection rules.
 3. Read `docs/languages/pre-codegen-checklist.md`.
 4. Read `docs/languages/do-not-generate-policy.md`.
 5. Read the relevant file under `docs/languages/` before generating
    language-specific code.
-6. For Python scripts, also read `docs/PYTHON.md`.
-7. For TypeScript or JavaScript, also read `docs/TYPESCRIPT.md`.
+6. For Python scripts, also read `docs/languages/python/python.md`.
+7. For TypeScript or JavaScript, also read `docs/languages/typescript/typescript.md`.
 8. Run validation when this skill folder is available:
 
 ```sh

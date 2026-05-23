@@ -9,7 +9,7 @@ from `0` to `10`; final target is `100/100`.
 2. Project discovery and structure clarity
 3. Runtime, package, and toolchain clarity
 4. Style, naming, documentation, and comment clarity
-5. Testing and verification clarity
+5. Testing, red-green-refactor, and verification clarity
 6. Security, privacy, and compliance clarity
 7. Algorithmic complexity and performance clarity
 8. Architecture, queues, concurrency, CPU, and GPU clarity

@@ -15,8 +15,9 @@ python scripts/validate-language-guidance.py
 
 - Individualized language files: `22/22`
 - Human-readable language README files: `22/22`
-- Operational language governance files: `10/10`
+- Operational language governance files: `11/11`
 - Required language sections: present
+- Test-first red-green-refactor sections: present
 - Senior decision labels: present
 - Final senior guardrail labels: present
 - LLM coding guardrails: present

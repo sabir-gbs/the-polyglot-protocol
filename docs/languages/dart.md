@@ -32,6 +32,13 @@ widgets, and package APIs. Document async behavior, thrown exceptions, state
 ownership, and widget responsibilities. Use inline comments for non-obvious
 layout, platform, and lifecycle decisions; avoid comments that restate code.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Dart, inspect `pubspec.yaml`, SDK constraints, package layout,

@@ -5,8 +5,8 @@ auditable process.
 
 ## How To Use This Directory
 
-1. Read `../../dev-workflow.md`.
-2. Read `../../language-guidelines.md`.
+1. Read `../workflow/dev-workflow.md`.
+2. Read `../language-guidelines.md`.
 3. Read `decision-matrix.md`.
 4. Read `pre-codegen-checklist.md`.
 5. Read the individualized language file for the code being generated.

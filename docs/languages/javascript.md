@@ -33,6 +33,13 @@ that lacks TypeScript type coverage. Document browser assumptions, async error
 behavior, side effects, and public contracts. Use inline comments for intent,
 workarounds, and security-sensitive behavior; do not narrate obvious statements.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating code, inspect `package.json`, lockfile, module type, bundler

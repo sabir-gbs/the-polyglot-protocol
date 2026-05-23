@@ -1,7 +1,7 @@
 # Language Guidelines
 
 This guide removes guesswork from code generation across languages. Use it with
-`dev-workflow.md`, `AGENTS.md`, `PYTHON.md`, and `TYPESCRIPT.md`.
+`docs/workflow/dev-workflow.md`, `AGENTS.md`, `docs/languages/python/python.md`, and `docs/languages/typescript/typescript.md`.
 
 ## Per-Language Files
 
@@ -79,7 +79,7 @@ Re-check before each upgrade or new project.
 
 | Area | Baseline | Verification source |
 |---|---:|---|
-| Python | `3.14.5+` target; follow `PYTHON.md` | python.org and `PYTHON.md` |
+| Python | `3.14.5+` target; follow `docs/languages/python/python.md` | python.org and `docs/languages/python/python.md` |
 | Node.js | Active LTS `24.16.0` | `https://nodejs.org/dist/index.json` |
 | TypeScript | `6.0.3` | npm registry `typescript/latest` |
 | Go | `1.26.3` | `https://go.dev/dl/?mode=json` |
@@ -103,13 +103,13 @@ Re-check before each upgrade or new project.
 
 ### Python
 
-Python is the default for scripts and automation. Follow `PYTHON.md`: Python
+Python is the default for scripts and automation. Follow `docs/languages/python/python.md`: Python
 `3.14.5+`, `venv`, exact pins, `ruff format`, `ruff`, `mypy --strict`, `pytest`,
 and `pip-audit`.
 
 ### TypeScript And JavaScript
 
-Follow `TYPESCRIPT.md`. Prefer TypeScript over JavaScript for new code, Node.js
+Follow `docs/languages/typescript/typescript.md`. Prefer TypeScript over JavaScript for new code, Node.js
 Active LTS for server/tooling code, ESM for new packages, exact dependencies,
 and package scripts over direct binary calls.
 

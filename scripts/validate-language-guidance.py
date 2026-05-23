@@ -51,6 +51,7 @@ REQUIRED_SECTIONS = [
     "## Tooling",
     "## Generation Rules",
     "## Source Documentation And Comments",
+    "## Test-First Red Green Refactor",
     "## Project Discovery And Structure",
     "## Design Patterns And Architecture",
     "## Algorithmic Complexity And Dynamic Programming",

@@ -30,6 +30,13 @@ and side effects. Use EmmyLua-style annotations when the project supports them.
 Comment metatables, coroutine behavior, mutation of shared tables, and embedded
 runtime assumptions; avoid comments that restate simple assignments.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Lua, inspect host runtime, Lua/LuaJIT version, module loader,

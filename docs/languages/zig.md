@@ -31,6 +31,13 @@ contracts, and target assumptions. Comment comptime behavior, ownership,
 sentinel and alignment assumptions, error-set intent, and FFI boundaries. Avoid
 comments that restate simple declarations.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Zig, inspect `build.zig`, target matrix, module layout,

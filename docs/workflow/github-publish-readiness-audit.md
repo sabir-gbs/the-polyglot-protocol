@@ -28,7 +28,7 @@ publication readiness.
 - Self-containment scan found no personal machine paths, hostnames, tailnet
   values, RustDesk/Tailscale references, or private IP strings.
 - Secret scan found no private keys or assigned secret values. One safe example
-  remains in `docs/PYTHON.md`: `token = secrets.token_urlsafe(32)`.
+  remains in `docs/languages/python/python.md`: `token = secrets.token_urlsafe(32)`.
 - License consistency check found no leftover `MIT`, `MPL-2.0`, or Mozilla
   license references.
 - Git repository check returned no active Git repository; Git initialization and

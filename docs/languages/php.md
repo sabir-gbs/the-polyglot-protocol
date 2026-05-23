@@ -33,6 +33,13 @@ shapes, and APIs where native types are insufficient. In WordPress, document
 hook names, expected arguments, capability checks, and escaping assumptions. Use
 comments for security-sensitive behavior; avoid restating obvious PHP syntax.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating PHP, inspect `composer.json`, framework or WordPress

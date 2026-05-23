@@ -15,7 +15,7 @@ discovery, overengineering, or ignoring validation.
 - `docs/languages/<language>/readme.md`: human-readable quality,
   completeness, and accuracy decisions for each language
 - `docs/language-guidelines.md`: language selection and default-script policy
-- `docs/dev-workflow.md`: planning, audit, validation, and `N/A` rules
+- `docs/workflow/dev-workflow.md`: planning, audit, validation, and `N/A` rules
 - `scripts/validate-workspace.py`: full local validation
 - `adapters/`: lightweight guidance and human-readable README files for Codex,
   Claude Code, and OpenCode

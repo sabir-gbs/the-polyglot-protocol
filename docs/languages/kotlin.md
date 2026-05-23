@@ -30,6 +30,13 @@ library APIs. Document coroutine behavior, nullability, threading, lifecycle,
 and Android platform assumptions. Use inline comments for non-obvious state,
 interop, and lifecycle decisions; avoid comments that repeat signatures.
 
+## Test-First Red Green Refactor
+
+For bug fixes and behavior changes, write or identify a failing test first, make
+the smallest change to pass, then refactor with tests green. If a test cannot be
+added, document the manual verification and why automated coverage is not
+practical.
+
 ## Project Discovery And Structure
 
 Before generating Kotlin, inspect Gradle/Maven config, Kotlin version, JVM or
