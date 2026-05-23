@@ -50,6 +50,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: use clickable `div` elements for actions. Good: use `button`, `a`,
+  labels, headings, and landmarks with accessible names.
+- Bad: place form validation only in placeholder text. Good: use labels,
+  constraints, error text, and server-side validation parity.
+- Bad: build a visual-only document outline. Good: use heading order,
+  meaningful sections, alt text, and keyboard-friendly navigation.
+
 ## Project Discovery And Structure
 
 Before generating HTML, inspect templates, components, routing, server-rendering

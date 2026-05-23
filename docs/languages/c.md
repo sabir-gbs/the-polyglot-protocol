@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: return raw error codes without context. Good: define clear error enums or
+  constants, document ownership, and keep cleanup paths explicit.
+- Bad: allocate memory and return early on failure paths. Good: use one cleanup
+  path, free every owned allocation, and test failure branches.
+- Bad: copy into fixed buffers with unchecked length. Good: pass buffer sizes,
+  validate bounds, and prefer APIs that report truncation or failure.
+
 ## Project Discovery And Structure
 
 Before generating C, inspect build files, compiler flags, target platforms,

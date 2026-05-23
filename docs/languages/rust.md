@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: use `unwrap()` in production paths. Good: return `Result`, add context,
+  and handle expected failures at the boundary.
+- Bad: clone data to satisfy the borrow checker without measuring. Good: model
+  ownership deliberately and benchmark when copying may matter.
+- Bad: introduce async traits or channels for simple sequential work. Good: keep
+  synchronous code until I/O concurrency or throughput requires async.
+
 ## Project Discovery And Structure
 
 Before generating Rust, inspect `Cargo.toml`, workspace layout, features,

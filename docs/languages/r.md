@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: transform data with implicit column names and side effects. Good: validate
+  inputs, keep transformations explicit, and test expected data frames.
+- Bad: use loops for simple vectorized operations without measuring. Good: use
+  vectorized functions or clear data.table/dplyr pipelines with benchmarks.
+- Bad: save outputs to ambient working directories. Good: pass paths explicitly,
+  create directories deliberately, and document generated artifacts.
+
 ## Project Discovery And Structure
 
 Before generating R, inspect project layout, `renv.lock`, package structure,

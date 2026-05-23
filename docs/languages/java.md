@@ -51,6 +51,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: swallow checked exceptions and return `null`. Good: return explicit
+  result types, throw domain-specific exceptions, or preserve the cause.
+- Bad: make everything mutable and globally accessible. Good: use immutable
+  values, constructor injection, and narrow object lifetimes.
+- Bad: add a framework abstraction for a small branch. Good: use a simple method
+  or strategy only when variation is real and tested.
+
 ## Project Discovery And Structure
 
 Before generating Java, inspect Maven/Gradle files, JDK target, package layout,

@@ -53,6 +53,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: concatenate SQL, HTML, or shell strings with user input. Good: use
+  parameterized queries, escaping APIs, and validated command arguments.
+- Bad: mix routing, database writes, and rendering in one file. Good: keep
+  request validation, domain logic, persistence, and templates separate.
+- Bad: add dynamic properties or loose arrays for domain data. Good: use typed
+  DTOs, value objects, or documented associative shapes.
+
 ## Project Discovery And Structure
 
 Before generating PHP, inspect `composer.json`, framework or WordPress

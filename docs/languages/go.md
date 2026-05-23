@@ -53,6 +53,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: ignore returned errors with `_`. Good: handle, wrap, or deliberately
+  document every error path with enough context for debugging.
+- Bad: start goroutines without shutdown. Good: pass `context.Context`, bound
+  work, close channels deliberately, and test cancellation.
+- Bad: create broad interfaces before consumers exist. Good: define small
+  interfaces at the consuming boundary and keep concrete types simple.
+
 ## Project Discovery And Structure
 
 Before generating Go, inspect `go.mod`, package layout, internal packages,

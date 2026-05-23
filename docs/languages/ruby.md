@@ -51,6 +51,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: rescue `StandardError` and continue silently. Good: rescue expected
+  failures, preserve context, and test the failure behavior.
+- Bad: add monkey patches for convenience. Good: use small objects, modules, or
+  framework extension points with clear scope.
+- Bad: hide database queries in views or callbacks. Good: keep persistence,
+  domain behavior, and rendering boundaries explicit.
+
 ## Project Discovery And Structure
 
 Before generating Ruby, inspect `Gemfile`, lockfile, Rails or gem structure,

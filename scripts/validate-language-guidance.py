@@ -53,6 +53,7 @@ REQUIRED_SECTIONS = [
     "## Source Documentation And Comments",
     "## Test-First Red Green Refactor",
     "## Refactoring Playbook",
+    "## Best Practice Examples",
     "## Project Discovery And Structure",
     "## Design Patterns And Architecture",
     "## Algorithmic Complexity And Dynamic Programming",

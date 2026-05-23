@@ -57,6 +57,16 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: write a script that reads globals and mutates files immediately. Good:
+  parse arguments, validate paths with `pathlib`, support `--dry-run`, and keep
+  file-changing logic in testable functions.
+- Bad: catch `Exception` and print a vague message. Good: catch expected
+  failures, preserve the cause, return structured errors, and test failure paths.
+- Bad: scan a list repeatedly inside a loop. Good: build a `dict` or `set` once,
+  state the complexity, and test boundary sizes.
+
 ## Project Discovery And Structure
 
 Before generating code, inspect `pyproject.toml`, `requirements*.txt`, existing

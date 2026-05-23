@@ -53,6 +53,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: rely on implicit coercion and unvalidated objects. Good: validate inputs
+  at boundaries and keep runtime shapes explicit.
+- Bad: fire async work without awaiting or handling errors. Good: await,
+  propagate, cancel, or log failures with context.
+- Bad: mutate shared state from unrelated modules. Good: keep pure transforms,
+  explicit state owners, and tests for edge cases.
+
 ## Project Discovery And Structure
 
 Before generating code, inspect `package.json`, lockfile, module type, bundler

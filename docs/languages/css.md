@@ -51,6 +51,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: fix layout with hard-coded pixel offsets. Good: use semantic structure,
+  flex/grid, responsive constraints, and tested breakpoints.
+- Bad: duplicate color and spacing values everywhere. Good: use existing design
+  tokens or scoped custom properties with clear fallback behavior.
+- Bad: hide content visually without accessibility intent. Good: preserve
+  readable contrast, focus states, reduced-motion support, and text flow.
+
 ## Project Discovery And Structure
 
 Before generating CSS, inspect existing styling approach, tokens, breakpoints,

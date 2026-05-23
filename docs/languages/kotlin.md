@@ -50,6 +50,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: use nullable values as hidden control flow. Good: model absence and
+  failures with sealed classes, result types, or explicit validation.
+- Bad: launch coroutines without lifecycle ownership. Good: use structured
+  concurrency, cancellation, and dispatcher boundaries.
+- Bad: put platform calls in business logic. Good: isolate Android/JVM services
+  behind interfaces and test domain logic without platform state.
+
 ## Project Discovery And Structure
 
 Before generating Kotlin, inspect Gradle/Maven config, Kotlin version, JVM or

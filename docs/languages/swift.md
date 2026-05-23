@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: force unwrap values from user input or network data. Good: validate,
+  model absence explicitly, and surface recoverable errors.
+- Bad: perform heavy work on the main actor. Good: isolate UI updates, move
+  expensive work off the main path, and test cancellation.
+- Bad: couple views directly to persistence or networking. Good: use clear
+  state models and service boundaries that can be tested.
+
 ## Project Discovery And Structure
 
 Before generating Swift, inspect package or Xcode project settings, deployment

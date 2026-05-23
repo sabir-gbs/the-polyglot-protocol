@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: put network calls, parsing, and widget state in one build method. Good:
+  isolate services, typed models, and UI state with testable boundaries.
+- Bad: ignore `Future` errors. Good: await explicitly, handle typed failures,
+  and show stable loading, success, empty, and error states.
+- Bad: rebuild expensive widgets on every state change. Good: split widgets,
+  use const constructors, and profile before optimizing.
+
 ## Project Discovery And Structure
 
 Before generating Dart, inspect `pubspec.yaml`, SDK constraints, package layout,

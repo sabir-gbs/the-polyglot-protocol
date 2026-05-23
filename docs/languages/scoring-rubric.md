@@ -8,7 +8,7 @@ from `0` to `10`; final target is `100/100`.
 1. Language selection clarity
 2. Project discovery and structure clarity
 3. Runtime, package, and toolchain clarity
-4. Style, naming, documentation, and comment clarity
+4. Style, naming, documentation, comments, and best-practice example clarity
 5. Testing, red-green-refactor, refactoring playbook, and verification clarity
 6. Security, privacy, and compliance clarity
 7. Algorithmic complexity and performance clarity

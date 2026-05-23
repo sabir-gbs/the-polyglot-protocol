@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: block async work with `.Result` or `.Wait()`. Good: use async all the way
+  with `CancellationToken`, timeouts, and observable failures.
+- Bad: pass raw strings for domain states. Good: use enums, records, validated
+  value objects, or discriminated patterns that make invalid states explicit.
+- Bad: hide database calls inside unrelated services. Good: isolate persistence
+  behind clear boundaries and test contracts with realistic fixtures.
+
 ## Project Discovery And Structure
 
 Before generating C#, inspect the solution, project files, target framework,

@@ -53,6 +53,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: manage ownership with raw `new` and `delete`. Good: use RAII,
+  `std::unique_ptr`, containers, and deterministic lifetimes.
+- Bad: catch all exceptions and continue. Good: preserve context, recover only
+  from expected failures, and keep invariants intact.
+- Bad: optimize with manual pointer tricks first. Good: measure, choose the
+  right container/algorithm, and document complexity and lifetime assumptions.
+
 ## Project Discovery And Structure
 
 Before generating C++, inspect build files, standard level, compiler flags,

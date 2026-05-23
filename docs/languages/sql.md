@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: query rows one at a time from application code. Good: use set-based SQL,
+  indexes, constraints, and query plans.
+- Bad: run an irreversible migration without a rollout path. Good: add
+  backward-compatible schema, backfill safely, verify, then remove old columns.
+- Bad: store unvalidated JSON for core relational data. Good: model stable
+  fields with constraints and reserve JSON for genuinely variable attributes.
+
 ## Project Discovery And Structure
 
 Before generating SQL, identify the database dialect, migration tool, schema

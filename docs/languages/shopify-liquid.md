@@ -52,6 +52,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: duplicate markup across templates and sections. Good: extract snippets
+  only when reuse is real and keep schema settings documented.
+- Bad: assume every product has images, variants, or metafields. Good: guard
+  optional data and provide accessible fallback states.
+- Bad: push business rules into brittle Liquid branches. Good: use Shopify data
+  structures, theme settings, or app/backend logic at the right boundary.
+
 ## Project Discovery And Structure
 
 Before generating Liquid, inspect theme structure, JSON templates, sections,

@@ -51,6 +51,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: allocate without documenting ownership. Good: pass allocators explicitly,
+  define who frees memory, and test error paths.
+- Bad: ignore error unions for convenience. Good: propagate or handle errors
+  deliberately with context at the boundary.
+- Bad: optimize with unsafe pointer assumptions first. Good: use clear slices,
+  bounds-aware code, and benchmark before lower-level changes.
+
 ## Project Discovery And Structure
 
 Before generating Zig, inspect `build.zig`, target matrix, module layout,

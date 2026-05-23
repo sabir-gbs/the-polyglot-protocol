@@ -50,6 +50,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: rely on implicit globals. Good: use `local`, strict linting, and explicit
+  module exports.
+- Bad: return mixed shapes from a function. Good: keep return contracts stable,
+  document nil/error behavior, and test callers.
+- Bad: parse complex config with ad hoc string matching. Good: use a known data
+  format or a small validated parser with failure messages.
+
 ## Project Discovery And Structure
 
 Before generating Lua, inspect host runtime, Lua/LuaJIT version, module loader,

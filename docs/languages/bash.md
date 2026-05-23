@@ -50,6 +50,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: parse JSON with `grep`, `cut`, and fragile word splitting. Good: call
+  `jq` when it is an approved dependency or move the parsing into Python.
+- Bad: run `rm -rf "$path"` without validation. Good: require `--dry-run`,
+  validate the path, print the planned deletion, and require explicit approval.
+- Bad: loop over command output with `for item in $(cmd)`. Good: read lines with
+  `while IFS= read -r item; do ...; done` and quote every expansion.
+
 ## Project Discovery And Structure
 
 Before generating shell code, inspect existing scripts, shebangs, ShellCheck

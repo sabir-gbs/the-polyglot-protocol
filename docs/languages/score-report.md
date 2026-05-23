@@ -19,6 +19,7 @@ python scripts/validate-language-guidance.py
 - Required language sections: present
 - Test-first red-green-refactor sections: present
 - Refactoring playbook sections: present
+- Best-practice example sections: present
 - Senior decision labels: present
 - Final senior guardrail labels: present
 - LLM coding guardrails: present

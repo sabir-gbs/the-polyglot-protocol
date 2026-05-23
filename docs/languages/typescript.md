@@ -56,6 +56,15 @@ practical.
 - **Concurrency Refactor**: introduce async, threads, workers, queues, GPU, or parallelism only after profiling and with cancellation, backpressure, and race tests.
 - **Architecture De-Escalation**: remove unnecessary factories, inheritance, brokers, abstractions, or frameworks when simpler code satisfies the contract.
 
+## Best Practice Examples
+
+- Bad: accept `any` from an API and use it directly. Good: validate at the
+  boundary, convert to typed domain objects, and handle unknown states.
+- Bad: use boolean flags for multiple states. Good: use discriminated unions or
+  explicit state machines where invalid combinations are impossible.
+- Bad: block rendering with repeated expensive array scans. Good: pre-index with
+  `Map`/`Set`, memoize deliberately, and test large input behavior.
+
 ## Project Discovery And Structure
 
 Before generating code, inspect `package.json`, lockfile, `tsconfig.json`,
