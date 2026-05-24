@@ -1,5 +1,7 @@
 # The Polyglot Protocol
 
+![The Polyglot Protocol featured graphic](assets/polyglot-protocol-featured.png)
+
 A senior-engineer protocol for polyglot code generation, architecture, testing,
 security, performance, and agent validation.
 
