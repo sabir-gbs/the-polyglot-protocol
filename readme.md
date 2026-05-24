@@ -8,6 +8,13 @@ other skill-capable coding agents. It helps agents make disciplined coding
 decisions across languages without inventing APIs, skipping repository
 discovery, overengineering, or ignoring validation.
 
+The Polyglot Protocol is a protocol, not a framework: it does not replace an
+agent runtime, command system, planner, or orchestration layer. Instead, it
+defines the engineering standards those systems should follow. Frameworks such
+as OAC Framework and other agent-control systems can use it as a complementary
+quality layer for language choice, repository discovery, dependency discipline,
+testing, security, validation, and final review.
+
 ## What It Includes
 
 - `SKILL.md`: skill entrypoint
