@@ -2,8 +2,9 @@
 
 ![The Polyglot Protocol featured graphic](assets/polyglot-protocol-featured.png)
 
-A senior-engineer protocol for polyglot code generation, architecture, testing,
-security, performance, and agent validation.
+A senior-engineer protocol for polyglot code generation (codebases that span
+multiple programming languages, frameworks, or runtimes), architecture,
+testing, security, performance, and agent validation.
 
 This project packages a portable skill for Codex, Claude Code, OpenCode, and
 other skill-capable coding agents. It helps agents make disciplined coding
@@ -16,6 +17,47 @@ defines the engineering standards those systems should follow. Frameworks such
 as OAC Framework and other agent-control systems can use it as a complementary
 quality layer for language choice, repository discovery, dependency discipline,
 testing, security, validation, and final review.
+
+## The Problem
+
+Most coding agents can write code quickly, but speed is not the same as
+engineering judgment. In polyglot projects (projects that use multiple
+programming languages, frameworks, or runtimes), agents often guess at APIs,
+ignore repository conventions, choose the wrong language for the job, add
+unnecessary dependencies, skip validation, or produce code that looks plausible
+but fails under review.
+
+Without explicit guardrails, LLMs and coding agents do a lot of guesswork. Some
+models guess well enough to get by. Others burn tokens chasing dead ends:
+invented package names, unsupported flags, stale API assumptions, mismatched
+framework patterns, or fixes that solve the wrong problem.
+
+That problem compounds across languages and tools. A useful agent has to know
+when to preserve TypeScript patterns, when an operational script should be
+Python, when SQL needs parameterized queries and rollback notes, when
+platform-native code is required, and when a missing test, unsafe dependency, or
+unsupported toolchain is a hard stop.
+
+Without a protocol, every agent session becomes a one-off negotiation. You
+spend time re-explaining standards, correcting invented behavior, tightening
+vague plans, and asking for the validation the agent should have run already.
+
+## The Solution
+
+The Polyglot Protocol gives coding agents a portable senior-engineer operating
+standard before they generate code.
+
+It tells agents how to inspect the repository, preserve existing conventions,
+choose the right language, verify current tooling, avoid invented APIs,
+document risk, handle unsupported checks honestly, and validate the result
+before calling work complete.
+
+The result is not a new agent framework. It is the quality layer you can place
+inside the tools and frameworks you already use: Codex, Claude Code, OpenCode,
+OAC Framework, custom agent workflows, or team-specific automation.
+
+Frameworks control the workflow. The Polyglot Protocol controls the engineering
+bar.
 
 ## What It Includes
 
