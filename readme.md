@@ -59,6 +59,74 @@ OAC Framework, custom agent workflows, or team-specific automation.
 Frameworks control the workflow. The Polyglot Protocol controls the engineering
 bar.
 
+## Why Use A Protocol?
+
+| Without A Protocol | With The Polyglot Protocol |
+|---|---|
+| Agents guess at APIs and flags | Agents verify before relying on tools or APIs |
+| Generic code ignores repository conventions | Code follows existing language, framework, and project patterns |
+| Language and runtime choices drift | Language choice follows documented decision rules |
+| Validation is skipped or vague | Validation is required, and unsupported checks are marked `N/A` with evidence |
+| Dependencies get added casually | Dependencies require justification, version checks, and risk review |
+| Every session needs the same standards explained again | Standards are portable and reusable across agents |
+
+## How It Works
+
+```text
+Your coding request
+↓
+Repository discovery
+↓
+Language and framework decision rules
+↓
+Security, dependency, and validation guardrails
+↓
+Agent implementation
+↓
+Protocol audit and final verification
+```
+
+## Best Used With Agent Frameworks
+
+The Polyglot Protocol does not replace frameworks such as OAC Framework,
+OpenCode workflows, Claude Code plugins, or custom agent systems. It gives
+those systems a stronger engineering standard to follow.
+
+Use your framework for orchestration, commands, approvals, and agent routing.
+Use The Polyglot Protocol for language choice, dependency discipline,
+repository conventions, validation, security, and final review.
+
+## Is This For You?
+
+Use The Polyglot Protocol if you:
+
+- Work across multiple languages, frameworks, or runtimes.
+- Use coding agents for production code, not just prototypes.
+- Want agents to stop guessing at APIs, dependencies, and project conventions.
+- Need repeatable validation, security, testing, and review expectations.
+- Already use Codex, Claude Code, OpenCode, OAC Framework, or custom agent
+  workflows.
+
+Skip it if you:
+
+- Only want a fully autonomous agent framework.
+- Do not care whether generated code follows existing repository conventions.
+- Are experimenting with throwaway prototypes where validation does not matter.
+
+## Try This Test
+
+Ask your coding agent to modify a real project that uses more than one language
+or framework. Then check:
+
+- Did it inspect the repository before choosing an approach?
+- Did it preserve existing conventions?
+- Did it invent any APIs, flags, package names, or config keys?
+- Did it justify new dependencies?
+- Did it run the right validation?
+- Did it explain unsupported checks honestly?
+
+If you have to ask for these things manually, you need a protocol.
+
 ## What It Includes
 
 - `SKILL.md`: skill entrypoint
