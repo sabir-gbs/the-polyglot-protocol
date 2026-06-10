@@ -4,6 +4,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+"""
+Workspace validation script for the Polyglot Protocol.
+
+Enforces naming, structure, and (when present) packaged skill language guidance
+contract checks. Follows Google-style docstrings and explicit complexity per
+docs/PYTHON.md.
+"""
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_UPPERCASE = {"AGENTS.md", "CLAUDE.md", "SKILL.md"}
@@ -36,6 +43,48 @@ def run_language_validator() -> list[str]:
     return []
 
 
+def run_packaged_language_validator() -> list[str]:
+    """Additionally validate the language guidance inside the packaged skill.
+
+    This ensures the the-polyglot-protocol/ copy receives the full contract checks.
+    """
+    packaged_script = ROOT / "the-polyglot-protocol" / "scripts" / "validate-language-guidance.py"
+    if not packaged_script.exists():
+        return []
+
+    result = subprocess.run(
+        [sys.executable, str(packaged_script)],
+        cwd=ROOT / "the-polyglot-protocol",
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.stdout:
+        print("--- packaged skill language guidance ---\n" + result.stdout, end="")
+    if result.stderr:
+        print(result.stderr, end="", file=sys.stderr)
+    if result.returncode != 0:
+        return ["packaged skill language guidance validator failed"]
+    return []
+
+
+def check_skill_package_sync() -> list[str]:
+    """Guard against drift between root scripts and packaged skill copies."""
+    errors: list[str] = []
+    root_scripts = ROOT / "scripts"
+    pkg_scripts = ROOT / "the-polyglot-protocol" / "scripts"
+
+    if not (root_scripts.exists() and pkg_scripts.exists()):
+        return errors
+
+    for name in ("validate-workspace.py", "validate-language-guidance.py"):
+        root_f = root_scripts / name
+        pkg_f = pkg_scripts / name
+        if pkg_f.exists() and root_f.read_bytes() != pkg_f.read_bytes():
+            errors.append(f"packaged skill script is out of sync with root: {name}")
+    return errors
+
+
 def check_files() -> list[str]:
     errors: list[str] = []
     for path in sorted(ADAPTER_READMES):
@@ -61,7 +110,9 @@ def check_files() -> list[str]:
 
 def main() -> int:
     errors = run_language_validator()
+    errors.extend(run_packaged_language_validator())
     errors.extend(check_files())
+    errors.extend(check_skill_package_sync())
 
     if errors:
         print("workspace validation: FAIL")
