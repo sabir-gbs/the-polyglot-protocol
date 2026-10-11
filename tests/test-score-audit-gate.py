@@ -86,7 +86,9 @@ class ScoreAuditGateTest(unittest.TestCase):
         self.assertEqual(self.run_gate(duplicate, audit_text([9] * 10))[0], INVALID_CODE)
 
     def test_missing_file_is_invalid(self) -> None:
-        self.assertEqual(GATE.main(["/nonexistent/a.txt", "/nonexistent/b.txt"]), INVALID_CODE)
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = GATE.main(["/nonexistent/a.txt", "/nonexistent/b.txt"])
+        self.assertEqual(code, INVALID_CODE)
 
     # --- malformed contract lines are rejected, not ignored ---------------
     def test_negative_score_line_is_invalid(self) -> None:
@@ -178,6 +180,26 @@ class ScoreAuditGateTest(unittest.TestCase):
     def test_unreadable_lock_is_invalid(self) -> None:
         text = audit_text([10] * 10)
         self.assertEqual(self.run_gate(text, text, "--lock", "/nonexistent/lock.json")[0], INVALID_CODE)
+
+    # --- undecodable input is invalid input (exit 2), not a crash ---------
+    def test_undecodable_audit_file_is_invalid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first, second = Path(tmp) / "a.txt", Path(tmp) / "b.txt"
+            first.write_bytes(b"\xff\xfe\x00")
+            second.write_text(audit_text([10] * 10), encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = GATE.main([str(first), str(second)])
+        self.assertEqual(code, INVALID_CODE)
+
+    def test_undecodable_lock_file_is_invalid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first, second, lock = Path(tmp) / "a.txt", Path(tmp) / "b.txt", Path(tmp) / "lock.json"
+            for path in (first, second):
+                path.write_text(audit_text([10] * 10), encoding="utf-8")
+            lock.write_bytes(b"\xff\xfe\x00")
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = GATE.main([str(first), str(second), "--lock", str(lock)])
+        self.assertEqual(code, INVALID_CODE)
 
 
 if __name__ == "__main__":

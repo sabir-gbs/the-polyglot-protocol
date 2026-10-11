@@ -70,7 +70,12 @@ def parse_audit(path: Path) -> AuditResult:
     advertised: int | None = None
     findings: list[tuple[str, str, str]] = []
 
-    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as error:
+        raise InvalidInputError(f"cannot decode {path} as UTF-8: {error.reason}") from error
+
+    for number, line in enumerate(text.splitlines(), 1):
         if not RESERVED_RE.match(line):
             continue
         if match := VERDICT_RE.match(line):
@@ -103,6 +108,8 @@ def load_lock(path: Path) -> tuple[str, dict[str, object]]:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         raise InvalidInputError(f"cannot read lock file {path}: {error}") from error
+    except UnicodeDecodeError as error:
+        raise InvalidInputError(f"cannot decode lock file {path} as UTF-8: {error.reason}") from error
     if not isinstance(data, dict):
         raise InvalidInputError(f"lock file {path} must contain a JSON object")
     mode = data.get("independence")
