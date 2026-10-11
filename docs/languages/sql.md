@@ -25,6 +25,10 @@ Use parameterized queries from application code. Add reversible migrations when
 possible, explicit constraints, indexes with query-plan evidence for risky
 paths, and transaction boundaries. Never concatenate untrusted input into SQL.
 
+- Bind parameters carry data, not code. They cannot stand in for table names, column names, or sort direction.
+- Take identifiers and `ASC` or `DESC` from a fixed allow-list in code, never from user input.
+- Avoid dynamic SQL inside stored procedures. If you cannot, validate or allow-list its inputs.
+
 ## Source Documentation And Comments
 
 Comment migrations with intent, data-impact, rollback notes, locking risk, and
