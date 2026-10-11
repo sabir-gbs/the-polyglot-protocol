@@ -222,6 +222,8 @@ this baseline and relax only with a documented reason:
   globals and `node:*` imports need `"types": ["node"]`.
 - **Build output**: `rootDir`, `outDir`, and `include` send build output to
   `dist/`, so `tsc -p` does not write `.js` and `.d.ts` files beside sources.
+  With `rootDir: "."`, compiled files land under `dist/src`, so point `main` or
+  `exports` there.
 - **Applications** may set `declaration: false` when they do not publish a public
   package API. Turn `declarationMap` off with it, because the compiler rejects
   `declarationMap` without `declaration`.
@@ -271,7 +273,7 @@ explicit warning budget.
 
 Use this only for new projects without a stronger local config. It follows
 typescript-eslint's current flat-config pattern with typed linting and
-`projectService: true`.
+`projectService: true`. It ignores `dist`, which holds generated build output.
 
 ```js
 import js from "@eslint/js";
@@ -279,6 +281,7 @@ import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
+  { ignores: ["dist"] },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
@@ -775,7 +778,8 @@ programming boring unless a public API genuinely benefits from it.
   caching. Keep build-info files out of source control unless the project has a
   specific reason to track them.
 - Keep `declaration` emit limited to packages that publish types. App-only code
-  should not pay declaration emit cost unless another tool requires it.
+  should not pay declaration emit cost unless another tool requires it. Turn
+  `declarationMap` off with it, because it needs `declaration`.
 - Run `tsc --extendedDiagnostics` or project build profiling before doing
   non-obvious type-system refactors for performance.
 - For deep compiler performance investigations, use TypeScript trace generation
