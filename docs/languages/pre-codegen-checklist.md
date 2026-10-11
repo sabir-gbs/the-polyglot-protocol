@@ -18,6 +18,10 @@ Run this checklist before generating or editing code.
 9. Check `docs/languages/do-not-generate-policy.md` for hard stops.
 10. State assumptions, validation commands, rollback notes, and justified `N/A`
     items in the workflow artifacts.
+11. State the desired effect and the smallest change that produces it before
+    writing code.
+12. Plan code comments and docstrings to follow the plain-language comment rule
+    in `docs/language-guidelines.md`.
 
 ## Completion Gate
 

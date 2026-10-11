@@ -60,6 +60,9 @@ Use `docs/languages/` for language-specific instructions:
 
 ## Universal Rules
 
+- Basic rule: take the minimal path, with the minimal change, that produces the
+  desired effect. Name the effect first. Do not add features, options,
+  abstractions, or checks the request does not need.
 - Prefer stable production releases over preview, beta, nightly, or development
   channels.
 - Keep dependencies minimal, exact, locked, and justified.
@@ -71,6 +74,11 @@ Use `docs/languages/` for language-specific instructions:
 - Use structured parsers and APIs instead of ad hoc string manipulation.
 - Store generated workflow artifacts under `docs/workflow/` with kebab-case
   filenames and no dates.
+- Write code comments and docstrings in plain US English at about a 6th grade
+  reading level. Technical terms are fine. Say why the code does something, not
+  what the next line obviously does. Leave out filler, hype, edit narration,
+  banners, and emoji. `scripts/validate-workspace.py` checks this for the
+  repository's own scripts and tests.
 
 ## Current Stable Baselines
 

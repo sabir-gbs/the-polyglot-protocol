@@ -22,5 +22,8 @@ from `0` to `10`; final target is `100/100`.
 - `90-99`: usable but one or more senior decisions are implicit.
 - `70-89`: partial guidance; code generation will require assumptions.
 - Below `70`: not acceptable for autonomous code generation.
+- Criterion 4 includes the plain-language comment rule in
+  `docs/language-guidelines.md`. Comments that restate the code, narrate edits,
+  hype the result, or pad with filler lower that score.
 
 Record concrete gaps and fixes in the workflow audit before editing code.

@@ -37,6 +37,9 @@ python scripts/validate-workspace.py
 
 ## Core Rules
 
+- Basic rule: take the minimal path, with the minimal change, that produces the
+  desired effect. Name the effect first. Do not add features, options,
+  abstractions, or checks the request does not need.
 - Default operational scripts to Python unless the repository already has a
   better native script runner.
 - Preserve existing project language, framework, package manager, formatter,
@@ -49,6 +52,9 @@ python scripts/validate-workspace.py
   sources before pinning or upgrading.
 - Do not invent APIs, configuration keys, package names, services, flags, or
   framework behavior.
+- Write code comments and docstrings in plain US English at about a 6th grade
+  reading level. Technical terms are fine. No filler, hype, or edit narration.
+  See `docs/language-guidelines.md`.
 - Generated code is not complete until a whole-codebase protocol audit reaches
   `100/100` across the rubric, or a documented blocker explains why that target
   is impossible in the current scope.
@@ -72,7 +78,7 @@ python scripts/validate-workspace.py
 - Role resolution and harness reference: `docs/workflow/role-resolution.md`
 - Model profiles: `profiles/`
 - LLM failure modes: `docs/languages/top-llm-coding-nuances.md`
-- Current score: `docs/languages/score-report.md`
+- Current status: `docs/languages/score-report.md`
 
 ## Adapter Files
 
