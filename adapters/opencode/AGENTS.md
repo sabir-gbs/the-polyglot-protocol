@@ -1,12 +1,6 @@
-# OpenCode Adapter
+# The Polyglot Protocol (OpenCode)
 
-Use `../../SKILL.md` as the entrypoint for The Polyglot Protocol.
-
-Apply the language decision matrix, hard-stop policy, and relevant
-individualized language file before editing code.
-
-Validate with:
-
-```sh
-python ../../scripts/validate-workspace.py
-```
+Read `SKILL.md` in the installed skill folder and follow its Required Workflow
+in order. Validate from the skill root with `python scripts/validate-workspace.py`.
+For open-weight models use `profiles/opencode-open-weights.md`. Scripted
+auditors must use agents with `mode: "all"`.

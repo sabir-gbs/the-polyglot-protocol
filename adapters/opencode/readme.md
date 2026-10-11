@@ -1,25 +1,12 @@
-# OpenCode Environment Decisions
+# OpenCode Adapter
 
-Use this adapter when applying The Polyglot Protocol in OpenCode-style coding
-agents.
+Copy or install the whole skill folder, not this file alone, because the
+guidance links resolve from the skill root.
 
-## Quality Controls
+- Entry point: `SKILL.md`
+- Guidance file: `AGENTS.md` (in this folder)
+- Model profile for open-weight models: `profiles/opencode-open-weights.md`
 
-- Read `../../SKILL.md` before implementation.
-- Apply the relevant language guide before code generation.
-- Prefer simple, inspectable changes over hidden framework behavior.
-
-## Completeness Controls
-
-- Follow `../../docs/languages/pre-codegen-checklist.md`.
-- Check `../../docs/languages/do-not-generate-policy.md` for hard stops.
-- Keep validation commands and assumptions visible.
-
-## Accuracy Controls
-
-- Do not invent configuration, APIs, tool flags, or project structure.
-- Validate with:
-
-```sh
-python ../../scripts/validate-workspace.py
-```
+OpenCode reads global skills from `~/.config/opencode/skills` and
+`~/.agents/skills`. Validate from the skill root:
+`python scripts/validate-workspace.py`.
