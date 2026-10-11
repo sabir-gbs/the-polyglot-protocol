@@ -9,7 +9,7 @@ Use this README as the human-readable summary for `typescript.md`. The full rule
 - Inspect the existing repository structure, toolchain, tests, and conventions before generating code.
 - Preserve the project's language style, package manager, formatter, and test runner.
 - Use native documentation, validation, and error-handling conventions for TypeScript.
-- Add only justified dependencies and verify current stable versions from official or primary sources.
+- Add only justified dependencies and verify current stable versions from official or primary sources. Stay on `typescript` `6.0.x` until the `typescript-eslint` peer range allows a newer version.
 
 ## Completeness Controls
 

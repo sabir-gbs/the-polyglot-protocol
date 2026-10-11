@@ -115,18 +115,23 @@ folder structure unless the user approves a migration.
   dependency requires a short rationale. Prefer platform APIs and existing
   dependencies.
 - **Dev dependency baseline**: For new general TypeScript projects, include:
-  `typescript`, `tsx`, `eslint`, `typescript-eslint`, `prettier`, `vitest`, and
-  `@types/node` when Node APIs are used. Pin exact versions through the lockfile.
+  `typescript`, `tsx`, `eslint`, `@eslint/js`, `typescript-eslint`, `prettier`,
+  `vitest`, and `@types/node` when Node APIs are used. Pin exact versions through
+  the lockfile.
 - **Baseline versions**: For new npm projects, start with `typescript@6.0.3`,
-  `tsx@4.22.3`, `eslint@10.4.0`, `typescript-eslint@8.59.4`,
-  `prettier@3.8.3`, `vitest@4.1.7`, and `@types/node@24.12.4` when targeting
-  Node.js `24.x`. Re-check the registry before starting a new project.
+  `tsx@4.22.3`, `eslint@10.4.0`, `@eslint/js@10.0.1`,
+  `typescript-eslint@8.59.4`, `prettier@3.8.3`, `vitest@4.1.7`, and
+  `@types/node@24.12.4` when targeting Node.js `24.x`. ESLint 10 no longer
+  installs `@eslint/js`, so list it. Re-check the registry before starting a new
+  project.
 - **Node type versions**: Match `@types/node` to the target Node major. Do not use
   the global latest `@types/node` package when it describes a newer Current Node
   major than production.
 - **Version refresh gate**: Before scaffolding a new project, verify the current
   package versions and current Active LTS Node major. If they differ from this
-  dated baseline, use the newer verified baseline and update this document.
+  dated baseline, use the newer verified baseline and update this document. Stay
+  on `typescript` `6.0.x` until the `typescript-eslint` peer range allows a newer
+  version; check that range before bumping.
 - **Environment variables**: Read from `process.env` only at boundary modules,
   validate once, and pass typed config inward. Never scatter raw env access
   through business logic.
@@ -180,6 +185,9 @@ this baseline and relax only with a documented reason:
     "lib": ["ES2024"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "rootDir": ".",
+    "outDir": "dist",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -205,12 +213,18 @@ this baseline and relax only with a documented reason:
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": false
-  }
+  },
+  "include": ["src", "tests"]
 }
 ```
 
+- **`types`**: TypeScript 6 no longer loads `@types/*` packages on its own. Node
+  globals and `node:*` imports need `"types": ["node"]`.
+- **Build output**: `rootDir`, `outDir`, and `include` send build output to
+  `dist/`, so `tsc -p` does not write `.js` and `.d.ts` files beside sources.
 - **Applications** may set `declaration: false` when they do not publish a public
-  package API.
+  package API. Turn `declarationMap` off with it, because the compiler rejects
+  `declarationMap` without `declaration`.
 - **Source maps**: Generate source maps for debugging when needed, but do not
   publish private production source maps publicly. Upload them only to controlled
   error-reporting systems when access is restricted.
@@ -220,7 +234,9 @@ this baseline and relax only with a documented reason:
 - **Browser apps** must include the correct browser libs, usually
   `["ES2024", "DOM", "DOM.Iterable"]`.
 - **Bundler projects** may use `"moduleResolution": "Bundler"` when the framework
-  expects it. Do not mix NodeNext assumptions into bundler-only code.
+  expects it. Do not mix NodeNext assumptions into bundler-only code. Change
+  `module` and `moduleResolution` together: `Bundler` must pair with `module`
+  set to `ESNext` or `Preserve`, not `NodeNext`.
 - **`skipLibCheck`**: Keep `false` for packages and libraries. For large apps with
   dependency type conflicts, `true` is acceptable only as a temporary workaround
   with an issue or note.
@@ -911,6 +927,7 @@ project-name/
     "audit": "npm audit"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@types/node": "24.12.4",
     "eslint": "10.4.0",
     "prettier": "3.8.3",
