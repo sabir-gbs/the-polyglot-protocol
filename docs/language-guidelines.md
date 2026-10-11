@@ -62,7 +62,7 @@ Use `docs/languages/` for language-specific instructions:
 
 - Basic rule: take the minimal path, with the minimal change, that produces the
   desired effect. Name the effect first. Do not add features, options,
-  abstractions, or checks the request does not need.
+  or abstractions the request does not need.
 - Prefer stable production releases over preview, beta, nightly, or development
   channels.
 - Keep dependencies minimal, exact, locked, and justified.

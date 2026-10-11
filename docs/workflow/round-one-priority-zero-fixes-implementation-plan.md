@@ -600,7 +600,7 @@ In `SKILL.md`, under `## Core Rules`, add this as the FIRST bullet:
 ```markdown
 - Basic rule: take the minimal path, with the minimal change, that produces the
   desired effect. Name the effect first. Do not add features, options,
-  abstractions, or checks the request does not need.
+  or abstractions the request does not need.
 ```
 
 In `docs/language-guidelines.md`, under `## Universal Rules`, add the same bullet as the first bullet. In `docs/languages/pre-codegen-checklist.md`, add this after step `10.`, before the comment-rule step:
@@ -624,8 +624,7 @@ Under `## Universal Rules`, add this bullet at the end of the bullet list:
 - Write code comments and docstrings in plain US English at about a 6th grade
   reading level. Technical terms are fine. Say why the code does something, not
   what the next line obviously does. Leave out filler, hype, edit narration,
-  banners, and emoji. `scripts/validate-workspace.py` checks this for the
-  repository's own scripts and tests.
+  banners, and emoji.
 ```
 
 - [ ] **Step 2: `SKILL.md` Core Rules**

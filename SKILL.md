@@ -39,7 +39,7 @@ python scripts/validate-workspace.py
 
 - Basic rule: take the minimal path, with the minimal change, that produces the
   desired effect. Name the effect first. Do not add features, options,
-  abstractions, or checks the request does not need.
+  or abstractions the request does not need.
 - Default operational scripts to Python unless the repository already has a
   better native script runner.
 - Preserve existing project language, framework, package manager, formatter,
