@@ -126,12 +126,12 @@ FINDING <CRITICAL|MAJOR|MINOR> <file>:<line> <one-line summary>
 - `MAJOR` and `MINOR` do not block the gate but must still be fixed in the fix
   step.
 - An auditor output is invalid if it has anything other than ten `VERDICT`
-  lines, a score outside `0` to `10`, a contract line that is malformed,
-  indented or decorated (bulleted, quoted or bold) instead of starting at
-  column 0, or criterion names that differ from the other auditor's. The scorer
-  exits `2` for each. Re-dispatch that auditor once without counting a gate
-  round and record the invalid output. If the second output is also invalid,
-  record a blocker and stop the gate for that group.
+  lines, a score outside `0` to `10`, any line that looks like a contract line
+  but is not exactly in the contract shape at column 0, or criterion names that
+  differ from the other auditor's. The scorer exits `2` for each. Re-dispatch
+  that auditor once without counting a gate round and record the invalid
+  output. If the second output is also invalid, record a blocker and stop the
+  gate for that group.
 
 ## Criteria By Artifact Type
 

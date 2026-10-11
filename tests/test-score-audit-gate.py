@@ -268,6 +268,22 @@ class ScoreAuditGateTest(unittest.TestCase):
             "Finding CRITICAL a.md:3 x",
             "Auditor A: VERDICT clarity: 9/10",
             "Result - TOTAL: 90/100",
+            "Auditor A: **FINDING** CRITICAL a.md:3 x",
+            "| 1 | **FINDING** | **CRITICAL** | a.md:3 | x |",
+            "Auditor A: FINDING: CRITICAL a.md:3 x",
+            "Auditor A: FINDING:CRITICAL a.md:3 x",
+            "Finding: CRITICAL a.md:3 x",
+            "**Finding:** CRITICAL a.md:3 x",
+            "**Finding** CRITICAL a.md:3 x",
+            "1. **Finding:** CRITICAL a.md:3 x",
+            "- **Finding** (CRITICAL): a.md:3 x",
+            "Finding 1: CRITICAL a.md:3 x",
+            "Finding #1 - CRITICAL a.md:3 x",
+            "<b>FINDING</b> CRITICAL a.md:3 x",
+            "<li><b>FINDING</b> <b>CRITICAL</b> a.md:3 x</li>",
+            "Auditor A: FINDING[CRITICAL] a.md:3 x",
+            "Auditor A: FINDING, CRITICAL a.md:3 x",
+            "FINDING_CRITICAL a.md:3 x",
         ]
         for line in decorated:
             with self.subTest(line=line):
@@ -282,6 +298,7 @@ class ScoreAuditGateTest(unittest.TestCase):
             "NOTE that the TOTAL is re-added",
             "Each VERDICT line is parsed",
             "This FINDING was already reported",
+            "The VERDICT is final. Coverage: 9/10 files.",
             "Finding Critical is treated as prose because the contract is ALL CAPS.",
         ]
         text = audit_text([10] * 10) + "\n".join(prose) + "\n"

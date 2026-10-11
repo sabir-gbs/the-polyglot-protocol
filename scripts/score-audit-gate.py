@@ -23,22 +23,22 @@ from pathlib import Path
 
 CRITERIA_COUNT = 10
 THRESHOLDS = {"full": 85, "degraded": 90}
-# A line is a reserved contract line if ANY of these patterns matches, however
-# it is decorated or prefixed. The strict shapes below only match at column 0,
-# so a reserved line that is not a clean column-0 contract line is rejected
-# (exit 2) instead of silently ignored. Listing prefixes can never be complete,
-# so the patterns key on the contract tokens themselves:
-#   1. an ALL-CAPS keyword after any run of non-word characters, underscores,
-#      or numeric list markers ("1.", "1)");
-#   2. a FINDING (any case) followed by an ALL-CAPS severity word, anywhere;
-#   3. a verdict-shaped fragment ("VERDICT ...: 9/10"), anywhere;
-#   4. a total-shaped fragment ("TOTAL: 90/100"), anywhere.
-# Mixed-case severity words ("Finding Critical") are intentionally prose,
-# because the contract is ALL CAPS; so is lower-case running text.
+# A line counts as a contract line if any pattern below matches it, whatever
+# marks or words come before it. Listing prefixes is never complete, so the
+# patterns look for the contract words themselves. A contract line that is not
+# an exact column-0 match is rejected with exit 2. Silent skips would let a
+# CRITICAL finding pass the gate.
+#   1. A capital keyword after only marks, list numbers, or underscores.
+#   2. FINDING in any case, then only marks, digits, or tags, then a
+#      capital severity word.
+#   3. A VERDICT fragment that ends the line as ": N/10".
+#   4. A TOTAL fragment of the form "TOTAL: N/100".
+# A severity word in mixed case ("Finding Critical") is treated as prose on
+# purpose. The contract is all capitals, and prose often uses that wording.
 RESERVED_PATTERNS = (
     re.compile(r"^(?:[\W_]|\d+[.)])*(?:VERDICT|TOTAL|FINDING)\b"),
-    re.compile(r"\b(?i:finding)[ \t]+[\W_]*(?:CRITICAL|MAJOR|MINOR)\b"),
-    re.compile(r"\bVERDICT\b[^\n]*:\s*\d+/10\b"),
+    re.compile(r"(?<![A-Za-z])(?i:finding)(?![A-Za-z])(?:<[^<>\n]*>|[\W\d_])*(?:CRITICAL|MAJOR|MINOR)\b"),
+    re.compile(r"\bVERDICT\b[^:\n]*:\s*\d+/10\s*$"),
     re.compile(r"\bTOTAL\b\s*:\s*\d+/100\b"),
 )
 VERDICT_RE = re.compile(r"^VERDICT (?P<name>.+?): (?P<score>\d+)/10\s*$")
