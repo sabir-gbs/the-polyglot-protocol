@@ -27,7 +27,9 @@ or more programming languages.
 9. Split work into artifact groups and pass each group through the
    dual-auditor gate in `docs/workflow/artifact-group-audit-workflow.md`
    before starting the next group.
-10. Run validation when this skill folder is available:
+10. Run validation from the skill root (the folder that contains this file). It
+    checks the protocol repository itself, not the project you are generating
+    code for:
 
 ```sh
 python scripts/validate-workspace.py

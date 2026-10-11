@@ -1,7 +1,7 @@
 # Language Guidance Index
 
 Use this directory for language-specific code generation rules. Start with
-`../../language-guidelines.md` for language selection and default-script policy,
+`../language-guidelines.md` for language selection and default-script policy,
 then open the relevant language file before generating code.
 
 ## Default Rule

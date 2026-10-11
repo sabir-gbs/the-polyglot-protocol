@@ -65,10 +65,10 @@ Apply repository guidance in this order:
 2. `docs/workflow/dev-workflow.md`
 3. `docs/workflow/artifact-group-audit-workflow.md`
 4. `AGENTS.md`
-5. `language-guidelines.md`
+5. `docs/language-guidelines.md`
 6. `docs/languages/python/python.md`
 7. `docs/languages/typescript/typescript.md`
-8. `CLAUDE.md`
+8. `adapters/claude-code/CLAUDE.md`
 9. Other repository docs and scripts
 
 If two guidance files overlap, keep all content and resolve the conflict in
@@ -110,11 +110,11 @@ The audit log must contain:
 
 - Invoke applicable superpowers skills before acting. Typical defaults are
   `using-superpowers`, `writing-plans`, `verification-before-completion`,
-  `requesting-code-review`, `benchmark`, `qa`, and related workflow skills.
+  `requesting-code-review`, and related workflow skills.
 - Use Context7 to confirm current framework, library, browser, or tooling
   guidance when the request touches external technology.
 - Use repository-local guidance and scripts before inventing new workflow steps.
-- Use `language-guidelines.md` whenever the request involves language choice,
+- Use `docs/language-guidelines.md` whenever the request involves language choice,
   code generation, runtime defaults, toolchain installation, or dependency
   upgrades. Read the relevant file under `docs/languages/` before generating
   language-specific code. Default operational scripts to Python unless the
@@ -330,7 +330,7 @@ Score each criterion from `0` to `10` for a total score out of `100`.
 
 ## Guidance-File Audit Loop
 
-When the change touches `docs/workflow/dev-workflow.md`, `AGENTS.md`, `CLAUDE.md`, or another
+When the change touches `docs/workflow/dev-workflow.md`, `AGENTS.md`, `adapters/claude-code/CLAUDE.md`, or another
 guidance file, run three guidance-file audit rounds after the edits.
 
 ### Guidance-File Audit Criteria
@@ -372,7 +372,7 @@ CloakBrowser validation must cover:
 
 Frontend validation rules:
 
-- Use the superpowers QA workflow for frontend validation.
+- Use the `verification-before-completion` skill and the CloakBrowser checks below for frontend validation.
 - Prefer CloakBrowser's Playwright-compatible locators and web-first assertions
   over brittle selectors.
 - Use CloakBrowser as the default browser automation path. Direct Playwright is

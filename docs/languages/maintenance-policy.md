@@ -20,7 +20,7 @@ docs. Do not rely on memory for modern tool versions.
 ## Review Requirements
 
 - Update `docs/languages/index.md` when files are added or renamed.
-- Update `language-guidelines.md` when language selection or default policy
+- Update `docs/language-guidelines.md` when language selection or default policy
   changes.
 - Run the scoring rubric after guidance changes.
 - Record workflow artifacts under `docs/workflow/`.

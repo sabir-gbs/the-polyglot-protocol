@@ -6,7 +6,7 @@ Run this checklist before generating or editing code.
 
 1. Read `docs/workflow/dev-workflow.md`.
 2. Read `AGENTS.md`.
-3. Read `language-guidelines.md`.
+3. Read `docs/language-guidelines.md`.
 4. Read `docs/languages/decision-matrix.md`.
 5. Read the relevant individualized language file.
 6. Read `docs/languages/python/python.md` for Python scripts or `docs/languages/typescript/typescript.md` for TypeScript and

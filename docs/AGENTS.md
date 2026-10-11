@@ -12,7 +12,7 @@ Root guides:
 
 - `docs/languages/python/python.md`: Python runtime, portability, security, and testing guidance.
 - `docs/languages/typescript/typescript.md`: TypeScript and JavaScript runtime, tooling, style, and testing guidance.
-- `language-guidelines.md`: Language selection, default toolchains, and cross-language code generation rules.
+- `docs/language-guidelines.md`: Language selection, default toolchains, and cross-language code generation rules.
 - `docs/languages/`: Individual guidance files for Bash, C, C#, C++, CSS, Dart, Go, HTML, Java, JavaScript, Kotlin, Lua, PHP, Python, R, Ruby, Rust, Shopify Liquid, SQL, Swift, TypeScript, and Zig.
 - `docs/workflow/dev-workflow.md`: Required workflow for add, change, and update requests.
 - `docs/workflow/artifact-group-audit-workflow.md`: Per-artifact-group dual-auditor audit gate used by the required workflow.
@@ -24,7 +24,7 @@ There are no source, test, asset, package, or build directories. If code is adde
 
 ## Guidance Documents & Rules
 
-Check guidance before changing files. Use `docs/workflow/dev-workflow.md` for the operating process, `language-guidelines.md` for language choice and default toolchains, the relevant file under `docs/languages/` before generating language-specific code, `docs/languages/python/python.md` for Python code and scripts, and `docs/languages/typescript/typescript.md` only when TypeScript or JavaScript is required. When adding rule documents, reference them here.
+Check guidance before changing files. Use `docs/workflow/dev-workflow.md` for the operating process, `docs/language-guidelines.md` for language choice and default toolchains, the relevant file under `docs/languages/` before generating language-specific code, `docs/languages/python/python.md` for Python code and scripts, and `docs/languages/typescript/typescript.md` only when TypeScript or JavaScript is required. When adding rule documents, reference them here.
 
 ## Build, Test, and Development Commands
 
@@ -42,7 +42,7 @@ Use `python scripts/validate-workspace.py` as the primary local validation comma
 
 Write Markdown with concise headings, direct instructions, and fenced command blocks. Use kebab-case for new filenames, such as `agent-notes.md` or `build-script.py`; never put dates in filenames. Prefer ASCII punctuation and avoid machine-specific absolute paths.
 
-Use Python as the default language for repository scripts. Script work must follow `docs/languages/python/python.md`, `language-guidelines.md`, and `docs/workflow/dev-workflow.md`. Use platform-native languages for platform code such as WordPress PHP or Shopify Liquid, but keep operational automation in Python unless existing repo tooling clearly provides a better path.
+Use Python as the default language for repository scripts. Script work must follow `docs/languages/python/python.md`, `docs/language-guidelines.md`, and `docs/workflow/dev-workflow.md`. Use platform-native languages for platform code such as WordPress PHP or Shopify Liquid, but keep operational automation in Python unless existing repo tooling clearly provides a better path.
 
 ## Testing Guidelines
 
