@@ -157,7 +157,7 @@ Python guidance changes by runtime surface. Identify the target surface before c
 - **Lockfile format**: `requirements.txt` (generated via `pip freeze`)
 - **Install command**: `python -m pip install -r requirements.txt`
 - **Pin exact versions**: Use `==` pins only (no `>=`, `~=`, or bare package names).
-- **Example**: `requests==2.32.3` not `requests` or `requests>=2.32`.
+- **Example**: `requests==2.34.2` not `requests` or `requests>=2.32.4`.
 - **Before adding a dependency**: Check that it is not already covered by the stdlib (e.g., use `pathlib`, not `pathlib2`; use `tomllib`, not `tomli` for 3.14+). Prefer fewer dependencies.
 - **Dependency approval rule**: The tools and libraries explicitly prescribed in this document may be used when their section applies. Any other new third-party dependency requires user approval and a short rationale.
 - **No dependency injection frameworks.** If one seems necessary, ask the user.
@@ -213,7 +213,7 @@ Design public Python APIs for clarity, stability, and low overhead.
 - **Ruff rule configuration**: Enable these rule sets in `pyproject.toml` under `[tool.ruff.lint]`:
   `select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "T20", "S110", "EM", "C90", "S", "PGH", "RUF", "RUF100"]`
   This enforces: style (E/F/W), import sorting (I), naming (N), pyupgrade (UP), bugbears (B), shadowed builtins (A), comprehensions (C4), simplifications (SIM), no print (T20), no pass in except (S110), exception message variables (EM), McCabe complexity C90 max 10, bandit security (S), type-ignore requires error code (PGH), unused noqa (RUF100), ruff-specific (RUF).
-- **Per-file ignores**: Allow `T201` (print) in `tests/` via `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml`.
+- **Per-file ignores**: Allow `T201` (print) and `S101` (assert) in `tests/` via `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml`.
 - **Blank lines**: 2 blank lines between top-level definitions, 1 blank line within classes (enforced by E3 rules).
 
 ### Naming
@@ -318,7 +318,7 @@ Design public Python APIs for clarity, stability, and low overhead.
       @override
       def process(self) -> None: ...
   ```
-- **Generic classes**: Use `class Container[T]:` syntax (3.14+).
+- **Generic classes**: Use `class Container[T]:` syntax (3.12+).
 - **Type aliases**: Use PEP 695 syntax `type AliasName = ...` instead of `TypeAlias` annotation.
 
 ## Error Handling
@@ -621,7 +621,7 @@ def test_main_returns_success_for_default_invocation() -> None:
   select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "T20", "S110", "EM", "C90", "S", "PGH", "RUF", "RUF100"]
 
   [tool.ruff.lint.per-file-ignores]
-  "tests/**" = ["T201"]
+  "tests/**" = ["S101", "T201"]
 
   [tool.ruff.lint.mccabe]
   max-complexity = 10
@@ -787,7 +787,7 @@ All production code must be written with algorithmic efficiency and resource awa
   for item in large_list:
       append(transform(item))
   ```
-- **Use `itertools`**: `groupby`, `chain`, `islice`, `product`, `permutations`, `combinations`, `accumulate`, `batched` (3.14+) for efficient iteration patterns. Never reimplement these manually.
+- **Use `itertools`**: `groupby`, `chain`, `islice`, `product`, `permutations`, `combinations`, `accumulate`, `batched` (3.12+) for efficient iteration patterns. Never reimplement these manually.
 - **Use `collections`**: `Counter`, `defaultdict`, `deque`, `OrderedDict` for specialized data structures. Never manually implement counting, double-ended queues, or grouping.
 - **Use `bisect`**: For binary search on sorted sequences. Never linear-search a sorted list.
 - **Use `heapq`**: For priority queues and top-k problems. Never sort the entire list when only the top k elements are needed.
@@ -1059,7 +1059,7 @@ python -m ruff format --check src/ tests/
 python -m mypy --strict src/
 python -m pytest tests/ -v
 python -m pytest --cov=src tests/
-python -m pip-audit
+python -m pip_audit
 python -m build
 ```
 
@@ -1171,13 +1171,16 @@ Data security encompasses encryption, hashing, key management, data masking, and
 
 ### Hashing
 
-- **Password hashing**: Use `hashlib.scrypt()` or `bcrypt` (third-party). Never use `md5`, `sha1`, or plain `sha256` for passwords.
+- **Password hashing**: Ask the user about Argon2id first (OWASP lists it first; it needs a third-party library). Otherwise use `hashlib.scrypt()` or `bcrypt` (third-party). Never use `md5`, `sha1`, or plain `sha256` for passwords.
   ```python
   import hashlib
   import os
 
   salt = os.urandom(16)
-  hashed = hashlib.scrypt(b"password", salt=salt, n=16384, r=8, p=1, dklen=64)
+  # n=2**17 uses about 128 MiB, so raise maxmem above the 32 MiB default.
+  hashed = hashlib.scrypt(
+      b"password", salt=salt, n=2**17, r=8, p=1, maxmem=2**28, dklen=64
+  )
   ```
 - **bcrypt pattern** (ask user before introducing `bcrypt` library):
   ```python
@@ -1188,7 +1191,8 @@ Data security encompasses encryption, hashing, key management, data masking, and
   ```
 - **Password hashing rules**:
   - Always salt. Never hash without a unique per-user salt.
-  - Use a work factor / cost parameter appropriate for the hardware. Start with `n=16384` for scrypt or `rounds=12` for bcrypt.
+  - Use a work factor / cost parameter appropriate for the hardware. Start with `n=2**17` for scrypt (OWASP minimum, with `r=8` and `p=1`) or `rounds=12` for bcrypt.
+  - bcrypt uses at most 72 bytes of the password. Enforce a maximum length of 72 bytes; `bcrypt` 5.0.0 and newer raises `ValueError` for longer input.
   - Never truncate passwords before hashing.
   - Store the salt alongside the hash (they are not secrets).
 - **Data integrity hashing**: Use `hashlib.sha256` or `hashlib.sha512` for file checksums, data integrity verification, and deduplication keys.
@@ -1239,7 +1243,7 @@ Data security encompasses encryption, hashing, key management, data masking, and
   def secure_zero(data: bytearray) -> None:
       ctypes.memset(ctypes.addressof((ctypes.c_char * len(data)).from_buffer(data)), 0, len(data))
   ```
-- **Never log secrets**: Do not log API keys, passwords, tokens, session IDs, or auth headers. Use `str.masked` or equivalent patterns when debugging.
+- **Never log secrets**: Do not log API keys, passwords, tokens, session IDs, or auth headers. Use the `mask_*` helpers below when debugging.
 
 ### Data Masking and Redaction
 
@@ -1260,9 +1264,10 @@ Data security encompasses encryption, hashing, key management, data masking, and
 ### Input Sanitization
 
 - **SQL injection**: Always parameterized queries (see Database section). Never f-string or concatenate user input into SQL.
-- **Command injection**: Never pass user input to `subprocess` via `shell=True`. Use `args` list form.
+- **Command injection**: Never pass user input to `subprocess` via `shell=True`. Use `args` list form. Allow only expected URL schemes, such as `https`, before you clone. On Windows, a `.bat` or `.cmd` file may run through the command shell even with `shell=False`, so do not pass untrusted arguments to batch files. Call the real executable.
   ```python
-  subprocess.run(["git", "clone", user_url], timeout=30)
+  # "--" ends option parsing, so user_url cannot be read as an option.
+  subprocess.run(["git", "clone", "--", user_url], timeout=30)
   ```
 - **Path traversal**: Always validate and resolve paths. Never trust user-supplied filenames.
   ```python
@@ -1294,16 +1299,7 @@ Data security encompasses encryption, hashing, key management, data masking, and
 - **Encryption at rest**: Encrypt sensitive data before writing to disk or database. Use `Fernet` (see Encryption section).
 - **Database column encryption**: Encrypt PII columns before storing. Decrypt only at the application layer, never in the database.
 - **File permissions**: On Windows, use `tempfile.mkstemp()` which creates files with restricted permissions. Never create sensitive files in world-readable locations.
-- **Secure deletion**: For temporary sensitive files, overwrite before deletion:
-  ```python
-  def secure_delete(path: Path) -> None:
-      size = path.stat().st_size
-      with open(path, "r+b") as f:
-          f.write(os.urandom(size))
-          f.flush()
-          os.fsync(f.fileno())
-      path.unlink()
-  ```
+- **Secure deletion**: Do not rely on overwriting a file before deleting it. It does not work on SSDs or on journaling and snapshot filesystems. Use encryption at rest.
 
 ### Session and Token Security
 
