@@ -146,34 +146,40 @@ If you have to ask for these things manually, you need a protocol.
 
 ## Quick Start
 
-Use the skill folder directly from an agent that supports local skill folders,
-or copy the relevant adapter into the target agent's expected guidance location.
+Use the skill folder directly from an agent that supports local skill folders.
+Install the whole skill folder. Adapter files link to `SKILL.md` and `profiles/`,
+so an adapter copied on its own cannot find them.
 
 ## One-Line Install
 
 Codex:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent codex --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent codex
 ```
 
 Claude Code:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent claude-code --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent claude-code
 ```
 
 OpenCode:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent opencode --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent opencode
 ```
 
 Custom location:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --target ~/path/to/skills/the-polyglot-protocol --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --target ~/path/to/skills/the-polyglot-protocol
 ```
+
+Add `--force` to replace an existing install. It only replaces a previous
+install of this skill, and the target directory must be named
+`the-polyglot-protocol`. On Windows, create a directory yourself instead of
+`$(mktemp -d)`.
 
 Validate the project:
 
