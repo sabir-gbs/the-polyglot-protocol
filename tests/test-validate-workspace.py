@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
@@ -100,6 +101,24 @@ class ModelNeutralTest(unittest.TestCase):
 
     def test_clean_text_has_no_hits(self) -> None:
         self.assertEqual(VW.find_model_names("auditor A and auditor B"), [])
+
+
+class CheckFilesHiddenDirectoryTest(unittest.TestCase):
+    def test_hidden_directories_are_skipped(self) -> None:
+        original_root = VW.ROOT
+        self.addCleanup(setattr, VW, "ROOT", original_root)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / ".hidden").mkdir()
+            (root / ".hidden" / "Bad_File1.md").write_text("# x\n", encoding="utf-8")
+            (root / "visible").mkdir()
+            (root / "visible" / "Bad_File2.md").write_text("# x\n", encoding="utf-8")
+            VW.ROOT = root
+            errors = VW.check_files()
+        rules = ("uppercase", "numbered filename", "kebab-case")
+        filename_errors = [e for e in errors if any(rule in e for rule in rules)]
+        self.assertFalse(any(".hidden/Bad_File1.md" in e for e in filename_errors))
+        self.assertTrue(any("visible/Bad_File2.md" in e for e in filename_errors))
 
 
 if __name__ == "__main__":

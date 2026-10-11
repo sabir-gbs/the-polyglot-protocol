@@ -253,7 +253,7 @@ def check_files() -> list[str]:
         if not path.exists():
             errors.append(f"missing adapter readme: {path.relative_to(ROOT)}")
     for path in sorted(ROOT.rglob("*")):
-        if not path.is_file() or ".venv" in path.parts:
+        if not path.is_file() or any(part.startswith(".") for part in path.relative_to(ROOT).parts):
             continue
         if path.suffix not in {".md", ".py", ".sh"}:
             continue
