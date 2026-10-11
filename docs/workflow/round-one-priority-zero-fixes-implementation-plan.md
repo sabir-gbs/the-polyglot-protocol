@@ -4,7 +4,7 @@
 
 **Goal:** Fix the round 1 P0 findings that live outside the language guidance files: the installer, broken required paths, nonexistent skills, false score claims, and the false changelog entry.
 
-**Architecture:** Four tasks (Task 4 runs first). Task 1 rewrites `scripts/install-skill.py` as an allowlist installer with target guards, staged replacement, and `--dry-run`, with tests, and updates the readme install section. Task 2 applies exact text replacements to documents. Task 3 removes the hardcoded score and corrects the changelog entry.
+**Architecture:** Six tasks. Task 4 runs first, Task 5 (comment pass) runs after Task 1, Task 6 (guidance rule) runs last. Task 1 rewrites `scripts/install-skill.py` as an allowlist installer with target guards, staged replacement, and `--dry-run`, with tests, and updates the readme install section. Task 2 applies exact text replacements to documents. Task 3 removes the hardcoded score and corrects the changelog entry.
 
 **Tech Stack:** Python 3.14 standard library (`argparse`, `shutil`, `pathlib`, `unittest`, `subprocess`), Markdown.
 
@@ -18,6 +18,11 @@
 - Validators report `PASS` or `FAIL`.
 - Do not touch any file under `docs/languages/<language>.md`, `docs/languages/<language>/`, or the deep guides. Those belong to Wave 2.
 - Tests are `unittest` files named `tests/test-*.py` and run as `python tests/<file>`.
+- Code comments and docstrings use plain US English at about a 6th grade reading level.
+  Technical terms are fine. Say why, not what. No filler, hype, edit narration, banners,
+  or emoji. Banned in comments: "note that", "it's worth noting", "importantly",
+  "robust", "seamless", "leverage", "comprehensive", "ensure that", "simply".
+  Keep sentences under about 20 words. Every code-writing dispatch repeats this rule.
 - `python -B scripts/validate-workspace.py` must end with `workspace validation: PASS` at the end of every task.
 - Exit codes for the installer: `0` installed or dry-run ok, `2` refused or invalid.
 
@@ -758,6 +763,159 @@ Expected: `workspace validation: PASS`.
 ```bash
 git add scripts/score-audit-gate.py tests/test-score-audit-gate.py docs/workflow/model-agnostic-roles-audits.md
 git commit -m "Close scorer decoration bypass and correct stale audit log lines"
+```
+
+---
+
+### Task 5: Comments-only pass over scripts and tests
+
+Run this after Tasks 1, 3 and 4 so it covers the new installer and the scorer.
+
+**Files:**
+- Modify: every `scripts/*.py` and `tests/*.py` file, comments and docstrings only.
+
+**Interfaces:**
+- Consumes: the code as it stands after Tasks 1, 3 and 4.
+- Produces: identical behavior with plain comments. No code change of any kind.
+
+- [ ] **Step 1: Record the starting commit**
+
+Run: `git rev-parse HEAD` and keep the value as `BASE`.
+
+- [ ] **Step 2: Rewrite comments and docstrings**
+
+For every comment, docstring, and `help=` or `description=` string in the files above, apply the global comment rule. Typical fixes:
+
+- Replace a long docstring that restates the function name with one short line.
+- Remove sentences that narrate an edit or hype the result.
+- Replace filler such as "ensures that", "robust", "comprehensive", "simply" with the plain fact.
+- Keep technical terms, exit codes, flag names, and the `Raises:` and `Complexity:` lines where the Python guidance asks for them, but write them in short plain sentences.
+- Keep every comment that explains a reason (for example why `sys.modules` is set before `exec_module`).
+
+Do not change any statement, name, string literal used in logic, regular expression, or test assertion. Only comments and docstrings change.
+
+- [ ] **Step 3: Prove no code changed**
+
+Run this from the repository root, with `BASE` set to the value from Step 1:
+
+```python
+import ast, subprocess
+from pathlib import Path
+
+BASE = "<value from Step 1>"
+
+def strip_docstrings(tree):
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            body = node.body
+            if body and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0], "value", None), ast.Constant) \
+                    and isinstance(body[0].value.value, str):
+                node.body = body[1:] or [ast.Pass()]
+    return tree
+
+def code_dump(source):
+    return ast.dump(strip_docstrings(ast.parse(source)))
+
+changed = 0
+for path in sorted(Path("scripts").glob("*.py")) + sorted(Path("tests").glob("*.py")):
+    old = subprocess.run(["git", "show", f"{BASE}:{path.as_posix()}"], capture_output=True, text=True).stdout
+    assert old, f"missing at BASE: {path}"
+    assert code_dump(old) == code_dump(path.read_text(encoding="utf-8")), f"CODE CHANGED: {path}"
+    changed += 1
+print("code identical in", changed, "files")
+```
+
+Expected: `code identical in N files` and no assertion error. The one allowed exception is a `description=__doc__` or `help=` string, which are strings and appear in the AST; if the check reports a change only in such a string, list it in the report.
+
+- [ ] **Step 4: Check the comment rule**
+
+Run: `grep -rniE "note that|worth noting|importantly|robust|seamless|leverage|comprehensive|ensure that|simply|gracefully" scripts/*.py tests/*.py || echo "no filler words"`
+Expected: `no filler words`.
+
+Run this sentence-length check:
+
+```python
+import ast, io, re, tokenize
+from pathlib import Path
+
+long_ones = []
+for path in sorted(Path("scripts").glob("*.py")) + sorted(Path("tests").glob("*.py")):
+    source = path.read_text(encoding="utf-8")
+    texts = [tok.string.lstrip("# ") for tok in tokenize.generate_tokens(io.StringIO(source).readline) if tok.type == tokenize.COMMENT]
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            doc = ast.get_docstring(node)
+            if doc:
+                texts.append(doc)
+    for text in texts:
+        for sentence in re.split(r"(?<=[.!?])\s+", text):
+            if len(sentence.split()) > 25:
+                long_ones.append((path.name, sentence[:80]))
+print(len(long_ones), "long sentences")
+for item in long_ones:
+    print(item)
+```
+
+Expected: `0 long sentences`. Shorten any that are listed.
+
+- [ ] **Step 5: Verify**
+
+Run: `python -B tests/test-score-audit-gate.py 2>&1 | tail -3`, `python -B tests/test-validate-workspace.py 2>&1 | tail -3`, `python -B tests/test-install-skill.py 2>&1 | tail -3`, `python -B tests/test-validate-language-guidance.py 2>&1 | tail -3`, then `python -B scripts/validate-workspace.py 2>&1 | tail -3`.
+Expected: `OK` four times and `workspace validation: PASS`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add scripts tests
+git commit -m "Rewrite code comments and docstrings in plain language"
+```
+
+---
+
+### Task 6: Put the comment rule in the protocol's guidance
+
+**Files:**
+- Modify: `docs/language-guidelines.md` (Universal Rules section)
+- Modify: `docs/languages/top-llm-coding-nuances.md` (Common Failure Modes)
+
+**Interfaces:**
+- Consumes: nothing.
+- Produces: two guidance entries. No code.
+
+- [ ] **Step 1: Add the Universal Rules bullet**
+
+In `docs/language-guidelines.md`, under `## Universal Rules`, add this bullet at the end of the bullet list:
+
+```markdown
+- Write code comments and docstrings in plain US English at about a 6th grade
+  reading level. Technical terms are fine. Say why the code does something, not
+  what the next line obviously does. Leave out filler, hype, edit narration,
+  banners, and emoji.
+```
+
+- [ ] **Step 2: Add the failure mode**
+
+In `docs/languages/top-llm-coding-nuances.md`, under `## Common Failure Modes`, add this bullet after the `**False confidence**` bullet:
+
+```markdown
+- **Slop comments**: comments that restate the code, narrate edits, hype the
+  result, or pad with filler such as "note that", "robust", "seamless", or
+  "ensure that". Write short, plain US English at about a 6th grade level, keep
+  technical terms, and explain why, not what.
+```
+
+- [ ] **Step 3: Verify**
+
+Run: `grep -n "6th grade" docs/language-guidelines.md docs/languages/top-llm-coding-nuances.md`
+Expected: two matching lines, one per file.
+Run: `python -B scripts/validate-workspace.py 2>&1 | tail -3`
+Expected: `workspace validation: PASS`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/language-guidelines.md docs/languages/top-llm-coding-nuances.md
+git commit -m "Add plain-language comment rule to protocol guidance"
 ```
 
 ---
