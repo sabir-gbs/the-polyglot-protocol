@@ -115,7 +115,9 @@ def run_script_tests() -> list[str]:
 
 
 def check_audit_workflow_references() -> list[str]:
-    """Check that the audit workflow doc exists, is linked, and states the gate threshold.
+    """Check that the audit workflow doc and the scorer exist.
+
+    Check that the guidance files link the doc and state the gate threshold.
 
     Complexity: O(f) in the number of checked files.
     """

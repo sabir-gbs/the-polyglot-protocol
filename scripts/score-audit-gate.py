@@ -81,9 +81,9 @@ class AuditResult:
 def parse_audit(path: Path) -> AuditResult:
     """Parse one auditor output file.
 
-    Any line that looks like a contract line (see RESERVED_PATTERNS), even one
-    that is indented, decorated, or prefixed, must match the contract exactly
-    at column 0.
+    A line that looks like a contract line (see RESERVED_PATTERNS) must match
+    the contract exactly at column 0. An indented, decorated, or prefixed
+    line is rejected.
 
     Complexity: O(n) in the number of lines.
 
