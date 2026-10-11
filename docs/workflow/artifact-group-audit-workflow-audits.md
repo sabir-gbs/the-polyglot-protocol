@@ -15,7 +15,7 @@ Collected during this run on this host.
 |---|---|---|---|
 | Lighthouse | `13.3.0` | `lighthouse: command not found`; `~/.local/bin/lighthouse` absent | Missing |
 | Context7 (`ctx7`) | `0.4.4` | `ctx7: command not found`; `~/.local/bin/ctx7` absent | Missing |
-| Node.js | Active LTS `24.16.0` (corrected to `24.21.0`, see Pin Review) | `/home/sabir/.local/share/mise/installs/node/26.9.0/bin/node`, `v26.9.0`, a Current release, not LTS | Present, host not on LTS |
+| Node.js | Active LTS `24.16.0` (corrected to `24.21.0`, see Pin Review) | `~/.local/share/mise/installs/node/26.9.0/bin/node`, `v26.9.0`, a Current release, not LTS | Present, host not on LTS |
 | `obra/superpowers` | `5.1.0` | `~/.codex/.tmp/plugins/plugins/superpowers/.codex-plugin/plugin.json` version `5.1.3` | Present, differs from pin |
 | CloakBrowser | `0.3.30` | `python -m pip show cloakbrowser`: `No module named pip`; `.venv/bin/python` absent | Missing |
 
