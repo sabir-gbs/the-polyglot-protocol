@@ -28,7 +28,7 @@ def good_profile() -> dict[str, object]:
             "local_only": False,
         },
         "pins": {},
-        "fallback": {role: {"harness": "h1", "model": "m"} for role in VW.ROLES},
+        "fallback": {role: {"harness": "h1", "model": f"model-{role}"} for role in VW.ROLES},
         "verified_on": "2026-10-01",
         "sources": ["https://example.org/docs"],
     }
@@ -45,7 +45,7 @@ class ValidateProfileTest(unittest.TestCase):
         errors, _ = VW.validate_profile(data, TODAY)
         self.assertTrue(any("fallback" in e for e in errors))
 
-    def test_fallback_must_cover_exactly_the_four_roles(self) -> None:
+    def test_missing_fallback_role_is_an_error(self) -> None:
         data = good_profile()
         del data["fallback"]["worker"]  # type: ignore[index]
         errors, _ = VW.validate_profile(data, TODAY)
@@ -79,6 +79,95 @@ class ValidateProfileTest(unittest.TestCase):
     def test_non_object_profile_is_an_error(self) -> None:
         errors, _ = VW.validate_profile([], TODAY)
         self.assertTrue(errors)
+
+    # --- structure: wrong types are errors, never exceptions --------------
+    def assert_error_mentioning(self, data: object, fragment: str) -> None:
+        errors, _ = VW.validate_profile(data, TODAY)
+        self.assertTrue(any(fragment in e for e in errors), (fragment, errors))
+
+    def test_non_object_containers_are_errors(self) -> None:
+        for key in ("harnesses", "constraints", "pins", "fallback"):
+            for bad in ([], "text", 5, None):
+                with self.subTest(key=key, bad=bad):
+                    data = good_profile()
+                    data[key] = bad
+                    self.assert_error_mentioning(data, key)
+
+    def test_sources_must_be_a_list_of_strings(self) -> None:
+        for bad in ("https://example.org", {}, [1], ["ok", None]):
+            with self.subTest(bad=bad):
+                data = good_profile()
+                data["sources"] = bad
+                self.assert_error_mentioning(data, "sources")
+
+    def test_allowed_providers_must_be_a_list(self) -> None:
+        for bad in ("opencode", {}, 5, None):
+            with self.subTest(bad=bad):
+                data = good_profile()
+                data["constraints"]["allowed_providers"] = bad  # type: ignore[index]
+                self.assert_error_mentioning(data, "allowed_providers")
+
+    def test_fallback_harness_and_model_must_be_non_empty_strings(self) -> None:
+        for field in ("harness", "model"):
+            for bad in ("", "  ", 5, None, [], {}):
+                with self.subTest(field=field, bad=bad):
+                    data = good_profile()
+                    data["fallback"]["worker"][field] = bad  # type: ignore[index]
+                    self.assert_error_mentioning(data, f"fallback.worker {field}")
+
+    def test_fallback_entry_that_is_not_an_object_is_an_error(self) -> None:
+        data = good_profile()
+        data["fallback"]["worker"] = "claude"  # type: ignore[index]
+        self.assert_error_mentioning(data, "fallback.worker")
+
+    def test_harness_entry_must_be_an_object_with_a_string_command(self) -> None:
+        for bad in ([], "tool", None, {"roles": ["worker"]}, {"command": 5, "roles": []}, {"command": "", "roles": []}):
+            with self.subTest(bad=bad):
+                data = good_profile()
+                data["harnesses"]["h1"] = bad  # type: ignore[index]
+                self.assert_error_mentioning(data, "harnesses.h1")
+
+    def test_harness_roles_must_be_a_list_of_known_roles(self) -> None:
+        for bad in ("worker", {}, 5, ["janitor"], ["worker", 3], None):
+            with self.subTest(bad=bad):
+                data = good_profile()
+                data["harnesses"]["h1"]["roles"] = bad  # type: ignore[index]
+                self.assert_error_mentioning(data, "harnesses.h1 roles")
+
+    def test_list_valued_harness_does_not_raise(self) -> None:
+        data = good_profile()
+        data["harnesses"] = ["h1"]
+        data["fallback"]["worker"]["harness"] = ["h1"]  # type: ignore[index]
+        errors, warnings = VW.validate_profile(data, TODAY)
+        self.assertTrue(errors)
+        self.assertIsInstance(warnings, list)
+
+    def test_unhashable_fallback_harness_does_not_raise(self) -> None:
+        data = good_profile()
+        data["fallback"]["worker"]["harness"] = {"a": 1}  # type: ignore[index]
+        errors, _ = VW.validate_profile(data, TODAY)
+        self.assertTrue(errors)
+
+    def test_same_model_for_both_auditors_is_an_error(self) -> None:
+        data = good_profile()
+        data["fallback"]["auditor_a"]["model"] = "same"  # type: ignore[index]
+        data["fallback"]["auditor_b"]["model"] = "same"  # type: ignore[index]
+        self.assert_error_mentioning(data, "same model")
+
+    def test_different_models_for_both_auditors_are_accepted(self) -> None:
+        data = good_profile()
+        data["fallback"]["auditor_a"]["model"] = "one"  # type: ignore[index]
+        data["fallback"]["auditor_b"]["model"] = "two"  # type: ignore[index]
+        self.assertEqual(VW.validate_profile(data, TODAY), ([], []))
+
+    def test_shipped_profiles_have_no_errors(self) -> None:
+        paths = sorted((ROOT / "profiles").glob("*.md"))
+        self.assertTrue(paths)
+        for path in paths:
+            with self.subTest(profile=path.name):
+                data = VW.extract_profile_json(path.read_text(encoding="utf-8"))
+                errors, _ = VW.validate_profile(data, date.today())
+                self.assertEqual(errors, [])
 
 
 class ExtractProfileJsonTest(unittest.TestCase):

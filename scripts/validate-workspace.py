@@ -164,10 +164,54 @@ def extract_profile_json(text: str) -> object:
         raise ValueError(f"invalid JSON: {error}") from error
 
 
+def _is_name(value: object) -> bool:
+    """Return True for a non-empty, non-blank string."""
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _check_harnesses(harnesses: dict[str, object]) -> list[str]:
+    errors: list[str] = []
+    for name, entry in harnesses.items():
+        if not isinstance(entry, dict):
+            errors.append(f"harnesses.{name} must be a JSON object")
+            continue
+        if not _is_name(entry.get("command")):
+            errors.append(f"harnesses.{name} needs a non-empty string command")
+        roles = entry.get("roles")
+        if not isinstance(roles, list) or not all(isinstance(role, str) and role in ROLES for role in roles):
+            errors.append(f"harnesses.{name} roles must be a list of names from {list(ROLES)}")
+    return errors
+
+
+def _check_fallback(fallback: dict[str, object], harnesses: object) -> list[str]:
+    errors: list[str] = []
+    for role in ROLES:
+        entry = fallback.get(role)
+        if not isinstance(entry, dict):
+            errors.append(f"fallback.{role} needs harness and model")
+            continue
+        for field_name in ("harness", "model"):
+            if not _is_name(entry.get(field_name)):
+                errors.append(f"fallback.{role} {field_name} must be a non-empty string")
+        harness = entry.get("harness")
+        if _is_name(harness) and isinstance(harnesses, dict) and harness not in harnesses:
+            errors.append(f"fallback.{role} uses undeclared harness {harness!r}")
+    models = [
+        entry.get("model") for entry in (fallback.get("auditor_a"), fallback.get("auditor_b")) if isinstance(entry, dict)
+    ]
+    if len(models) == 2 and all(_is_name(model) for model in models) and models[0] == models[1]:
+        errors.append("fallback uses the same model for auditor_a and auditor_b; the gate needs two models")
+    return errors
+
+
 def validate_profile(data: object, today: date) -> tuple[list[str], list[str]]:
     """Validate a parsed profile and return (errors, warnings).
 
-    A verified_on date older than STALE_DAYS is a warning, not an error.
+    Wrong-typed values are reported as errors; this function never raises on
+    malformed input. A verified_on date older than STALE_DAYS is a warning,
+    not an error.
+
+    Complexity: O(h + r) in harness and role entries.
     """
     errors: list[str] = []
     warnings: list[str] = []
@@ -176,22 +220,31 @@ def validate_profile(data: object, today: date) -> tuple[list[str], list[str]]:
     for key in PROFILE_KEYS:
         if key not in data:
             errors.append(f"missing key: {key}")
+
+    for key in ("harnesses", "constraints", "pins", "fallback"):
+        if key in data and not isinstance(data[key], dict):
+            errors.append(f"{key} must be a JSON object")
+    sources = data.get("sources")
+    if "sources" in data and (not isinstance(sources, list) or not all(isinstance(item, str) for item in sources)):
+        errors.append("sources must be a list of strings")
+
     constraints = data.get("constraints")
     if isinstance(constraints, dict):
         for key in CONSTRAINT_KEYS:
             if key not in constraints:
                 errors.append(f"missing constraints key: {key}")
+        if "allowed_providers" in constraints and not isinstance(constraints["allowed_providers"], list):
+            errors.append("constraints.allowed_providers must be a list")
         if constraints.get("licence_policy") not in LICENCE_POLICIES:
             errors.append(f"licence_policy must be one of {list(LICENCE_POLICIES)}")
+
     harnesses = data.get("harnesses")
+    if isinstance(harnesses, dict):
+        errors.extend(_check_harnesses(harnesses))
     fallback = data.get("fallback")
     if isinstance(fallback, dict):
-        for role in ROLES:
-            entry = fallback.get(role)
-            if not isinstance(entry, dict) or "harness" not in entry or "model" not in entry:
-                errors.append(f"fallback.{role} needs harness and model")
-            elif isinstance(harnesses, dict) and entry["harness"] not in harnesses:
-                errors.append(f"fallback.{role} uses undeclared harness {entry['harness']!r}")
+        errors.extend(_check_fallback(fallback, harnesses))
+
     verified = data.get("verified_on")
     if isinstance(verified, str):
         try:

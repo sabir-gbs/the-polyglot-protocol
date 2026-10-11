@@ -9,7 +9,7 @@ this file.
   "name": "default",
   "harnesses": {
     "claude-code": {
-      "command": "claude -p --model {model} --disallowedTools Edit Write < {prompt_file}",
+      "command": "claude -p --model {model} --disallowedTools Edit Write NotebookEdit Bash < {prompt_file}",
       "roles": ["orchestrator", "auditor_b", "worker"]
     },
     "codex": {
@@ -40,3 +40,8 @@ this file.
 
 Auditor A and Auditor B come from different families (OpenAI and Anthropic), so
 this profile runs the gate in `full` independence.
+
+Command placeholders: `{model}` is the model identifier from `fallback` or
+`pins`, `{prompt_file}` is the path of the file holding the role prompt, and
+`{output_file}` is the path where the harness writes its final answer (used by
+Codex through `--output-last-message`; Claude Code prints the answer to stdout).

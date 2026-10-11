@@ -13,8 +13,14 @@ commercial-use conditions. Set `licence_policy` to `permissive` or
   "name": "opencode-open-weights",
   "harnesses": {
     "opencode": {
-      "command": "opencode run --agent {agent} --model {model} --format json \"$(cat {prompt_file})\"",
-      "roles": ["orchestrator", "auditor_a", "auditor_b", "worker"]
+      "command": "opencode run --agent {agent} --model {model} \"$(cat {prompt_file})\"",
+      "roles": ["orchestrator", "auditor_a", "auditor_b", "worker"],
+      "agents": {
+        "orchestrator": "build",
+        "auditor_a": "polyglot-auditor",
+        "auditor_b": "polyglot-auditor",
+        "worker": "polyglot-worker"
+      }
     }
   },
   "constraints": {
@@ -44,3 +50,35 @@ Scripted auditors must use agents with `mode: "all"`, not `subagent`, or
 `opencode run --agent` silently falls back to the default agent and loses its
 read-only permissions. Auditor A and Auditor B come from different families
 (Moonshot and DeepSeek), so this profile runs in `full` independence.
+
+Command placeholders: `{model}` is the model identifier from `fallback` or
+`pins`, `{prompt_file}` is the path of the file holding the role prompt, and
+`{agent}` is the OpenCode agent for the role, taken from the harness entry's
+`agents` map. The command omits `--format json` because that flag prints raw
+JSON events instead of the final answer.
+
+## Agents to define in opencode.json
+
+The `polyglot-auditor` and `polyglot-worker` agents do not exist until you
+define them. Put this under the `agent` key in `~/.config/opencode/opencode.json`
+or in the project `opencode.json`:
+
+```json
+{
+  "agent": {
+    "polyglot-auditor": {
+      "description": "Read-only auditor for The Polyglot Protocol gate",
+      "mode": "all",
+      "permission": { "edit": "deny", "bash": "deny", "task": "deny", "webfetch": "allow", "websearch": "allow" }
+    },
+    "polyglot-worker": {
+      "description": "Read-only worker for The Polyglot Protocol gate",
+      "mode": "all",
+      "permission": { "edit": "deny", "bash": "deny", "task": "deny", "webfetch": "deny", "websearch": "deny" }
+    }
+  }
+}
+```
+
+`mode: "all"` is required for `opencode run --agent`. The `websearch` tool
+needs the `opencode` or `opencode-go` provider, or `OPENCODE_ENABLE_EXA=1`.
