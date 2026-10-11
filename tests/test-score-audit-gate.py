@@ -111,6 +111,27 @@ class ScoreAuditGateTest(unittest.TestCase):
         notes = audit_text([10] * 10) + "VERDICTS above were checked twice.\nTOTALLY fine.\n"
         self.assertEqual(self.run_gate(notes, audit_text([10] * 10))[0], PASS_CODE)
 
+    def test_decorated_or_indented_contract_lines_are_invalid(self) -> None:
+        decorated = {
+            "bullet finding": "- FINDING CRITICAL a.md:3 unsafe command",
+            "indented finding": "  FINDING CRITICAL a.md:3 unsafe command",
+            "blockquote finding": "> FINDING CRITICAL a.md:3 unsafe command",
+            "bold finding": "**FINDING CRITICAL** a.md:3 unsafe command",
+            "numbered finding": "1. FINDING CRITICAL a.md:3 unsafe command",
+            "decorated verdict": "- VERDICT criterion 11: 9/10",
+            "decorated total": "* TOTAL: 100/100",
+        }
+        for label, line in decorated.items():
+            with self.subTest(label):
+                bad = audit_text([10] * 10) + line + "\n"
+                code, out = self.run_gate(bad, audit_text([10] * 10))
+                self.assertEqual(code, INVALID_CODE)
+                self.assertIn("a.txt:", out)
+
+    def test_decorated_prose_words_are_still_ignored(self) -> None:
+        notes = audit_text([10] * 10) + "- VERDICTS above were checked twice.\n> TOTALLY fine.\n"
+        self.assertEqual(self.run_gate(notes, audit_text([10] * 10))[0], PASS_CODE)
+
     # --- both auditors must score the same criteria -----------------------
     def test_different_criterion_names_are_invalid(self) -> None:
         other = audit_text([9] * 10, names=[f"other {i}" for i in range(1, 11)])
@@ -176,6 +197,16 @@ class ScoreAuditGateTest(unittest.TestCase):
     def test_lock_with_unknown_independence_is_invalid(self) -> None:
         text = audit_text([10] * 10)
         self.assertEqual(self.run_with_lock(text, text, {"independence": "partial"})[0], INVALID_CODE)
+
+    def test_lock_with_non_string_independence_is_invalid(self) -> None:
+        text = audit_text([10] * 10)
+        for value in ([], {}, 5, None):
+            with self.subTest(value=value):
+                self.assertEqual(self.run_with_lock(text, text, {"independence": value})[0], INVALID_CODE)
+
+    def test_lock_without_independence_is_invalid(self) -> None:
+        text = audit_text([10] * 10)
+        self.assertEqual(self.run_with_lock(text, text, {})[0], INVALID_CODE)
 
     def test_unreadable_lock_is_invalid(self) -> None:
         text = audit_text([10] * 10)

@@ -23,7 +23,11 @@ from pathlib import Path
 
 CRITERIA_COUNT = 10
 THRESHOLDS = {"full": 85, "degraded": 90}
-RESERVED_RE = re.compile(r"^(VERDICT|TOTAL|FINDING)\b")
+# A contract line is any line whose first word, after optional whitespace and
+# markdown decoration (bullets, quotes, emphasis, headings, "1."), is a
+# reserved word. The strict shapes below only match at column 0, so a
+# decorated or indented contract line is rejected instead of silently ignored.
+RESERVED_RE = re.compile(r"^[\s>*_`#\-]*(?:\d+\.\s+)?(VERDICT|TOTAL|FINDING)\b")
 VERDICT_RE = re.compile(r"^VERDICT (?P<name>.+?): (?P<score>\d+)/10\s*$")
 TOTAL_RE = re.compile(r"^TOTAL: (?P<total>\d+)/100\s*$")
 FINDING_RE = re.compile(r"^FINDING (?P<severity>CRITICAL|MAJOR|MINOR) (?P<where>\S+) (?P<text>.+?)\s*$")
@@ -58,7 +62,9 @@ class AuditResult:
 def parse_audit(path: Path) -> AuditResult:
     """Parse one auditor output file.
 
-    Any line that starts with a reserved prefix must match the contract.
+    Any line whose first word is a reserved prefix, even one that is indented
+    or decorated (bulleted, quoted, bold, numbered), must match the contract
+    exactly at column 0.
 
     Complexity: O(n) in the number of lines.
 
@@ -113,7 +119,7 @@ def load_lock(path: Path) -> tuple[str, dict[str, object]]:
     if not isinstance(data, dict):
         raise InvalidInputError(f"lock file {path} must contain a JSON object")
     mode = data.get("independence")
-    if mode not in THRESHOLDS:
+    if not isinstance(mode, str) or mode not in THRESHOLDS:
         raise InvalidInputError(f"lock file {path}: independence must be one of {sorted(THRESHOLDS)}")
     roles = data.get("roles")
     if isinstance(roles, dict):
