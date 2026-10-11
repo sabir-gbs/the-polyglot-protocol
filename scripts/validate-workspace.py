@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import json
+import re
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 """
@@ -19,6 +22,18 @@ ADAPTER_READMES = {
     ROOT / "adapters" / "claude-code" / "readme.md",
     ROOT / "adapters" / "opencode" / "readme.md",
 }
+
+ROLES = ("orchestrator", "auditor_a", "auditor_b", "worker")
+LICENCE_POLICIES = ("any", "permissive", "commercial-ok")
+PROFILE_KEYS = ("name", "harnesses", "constraints", "pins", "fallback", "verified_on", "sources")
+CONSTRAINT_KEYS = ("allowed_providers", "max_cost_per_mtok", "licence_policy", "local_only")
+STALE_DAYS = 30
+MODEL_NAME_RE = re.compile(r"Sonnet|Opus|Haiku|gpt-|Gemini|Kimi|GLM|DeepSeek|Qwen|MiMo")
+MODEL_NEUTRAL_DOCS = (
+    "docs/workflow/artifact-group-audit-workflow.md",
+    "docs/workflow/dev-workflow.md",
+    "SKILL.md",
+)
 
 
 def is_kebab_case(path: Path) -> bool:
@@ -134,6 +149,104 @@ def check_audit_workflow_references() -> list[str]:
     return errors
 
 
+def extract_profile_json(text: str) -> object:
+    """Return the parsed first ```json fenced block of a profile file.
+
+    Raises:
+        ValueError: if there is no block or it is not valid JSON.
+    """
+    match = re.search(r"```json\s*\n(.*?)\n```", text, re.DOTALL)
+    if match is None:
+        raise ValueError("no ```json block found")
+    try:
+        return json.loads(match.group(1))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"invalid JSON: {error}") from error
+
+
+def validate_profile(data: object, today: date) -> tuple[list[str], list[str]]:
+    """Validate a parsed profile and return (errors, warnings).
+
+    A verified_on date older than STALE_DAYS is a warning, not an error.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not isinstance(data, dict):
+        return ["profile must be a JSON object"], warnings
+    for key in PROFILE_KEYS:
+        if key not in data:
+            errors.append(f"missing key: {key}")
+    constraints = data.get("constraints")
+    if isinstance(constraints, dict):
+        for key in CONSTRAINT_KEYS:
+            if key not in constraints:
+                errors.append(f"missing constraints key: {key}")
+        if constraints.get("licence_policy") not in LICENCE_POLICIES:
+            errors.append(f"licence_policy must be one of {list(LICENCE_POLICIES)}")
+    harnesses = data.get("harnesses")
+    fallback = data.get("fallback")
+    if isinstance(fallback, dict):
+        for role in ROLES:
+            entry = fallback.get(role)
+            if not isinstance(entry, dict) or "harness" not in entry or "model" not in entry:
+                errors.append(f"fallback.{role} needs harness and model")
+            elif isinstance(harnesses, dict) and entry["harness"] not in harnesses:
+                errors.append(f"fallback.{role} uses undeclared harness {entry['harness']!r}")
+    verified = data.get("verified_on")
+    if isinstance(verified, str):
+        try:
+            age = (today - date.fromisoformat(verified)).days
+        except ValueError:
+            errors.append("verified_on must be an ISO date (YYYY-MM-DD)")
+        else:
+            if age > STALE_DAYS:
+                warnings.append(f"verified_on is {age} days old (over {STALE_DAYS} days); re-verify")
+    elif "verified_on" in data:
+        errors.append("verified_on must be an ISO date (YYYY-MM-DD)")
+    return errors, warnings
+
+
+def check_profiles() -> list[str]:
+    """Validate every profiles/*.md file; print staleness warnings."""
+    errors: list[str] = []
+    profile_dir = ROOT / "profiles"
+    if not profile_dir.is_dir():
+        return ["missing directory: profiles/"]
+    for path in sorted(profile_dir.glob("*.md")):
+        rel = path.relative_to(ROOT)
+        try:
+            data = extract_profile_json(path.read_text(encoding="utf-8"))
+        except ValueError as error:
+            errors.append(f"{rel}: {error}")
+            continue
+        problems, warnings = validate_profile(data, date.today())
+        errors.extend(f"{rel}: {problem}" for problem in problems)
+        for warning in warnings:
+            print(f"WARNING {rel}: {warning}")
+    for required in ("default.md", "template.md"):
+        if not (profile_dir / required).exists():
+            errors.append(f"missing profile: profiles/{required}")
+    return errors
+
+
+def find_model_names(text: str) -> list[str]:
+    """Return model-family tokens found in text, in order of appearance."""
+    return MODEL_NAME_RE.findall(text)
+
+
+def check_core_docs_model_neutral() -> list[str]:
+    """Core workflow docs must not name a model; names live in profiles/."""
+    errors: list[str] = []
+    for name in MODEL_NEUTRAL_DOCS:
+        path = ROOT / name
+        if not path.exists():
+            continue
+        hits = find_model_names(path.read_text(encoding="utf-8"))
+        if hits:
+            errors.append(f"{name} names models {sorted(set(hits))}; move them to profiles/")
+    return errors
+
+
 def check_files() -> list[str]:
     errors: list[str] = []
     for path in sorted(ADAPTER_READMES):
@@ -163,6 +276,8 @@ def main() -> int:
     errors.extend(check_files())
     errors.extend(check_audit_workflow_references())
     errors.extend(run_script_tests())
+    errors.extend(check_profiles())
+    errors.extend(check_core_docs_model_neutral())
     errors.extend(check_skill_package_sync())
 
     if errors:
