@@ -232,6 +232,37 @@ class ScoreAuditGateTest(unittest.TestCase):
                 code = GATE.main([str(first), str(second), "--lock", str(lock)])
         self.assertEqual(code, INVALID_CODE)
 
+    def test_exotic_decorations_of_contract_lines_are_invalid(self) -> None:
+        decorated = [
+            "+ FINDING CRITICAL a.md:3 x",
+            "1. **FINDING CRITICAL** a.md:3 x",
+            "1) FINDING CRITICAL a.md:3 x",
+            "• FINDING CRITICAL a.md:3 x",
+            "| FINDING CRITICAL | a.md:3 | x |",
+            "(FINDING CRITICAL a.md:3 x)",
+            "[FINDING CRITICAL] a.md:3 x",
+            "⚠️ FINDING CRITICAL a.md:3 x",
+            "_FINDING CRITICAL_ a.md:3 x",
+            "- TOTAL: 100/100",
+            "> VERDICT extra: 10/10",
+        ]
+        for line in decorated:
+            with self.subTest(line=line):
+                text = audit_text([10] * 10) + line + "\n"
+                self.assertEqual(self.run_gate(text, audit_text([10] * 10))[0], INVALID_CODE)
+
+    def test_ordinary_prose_that_mentions_the_words_is_ignored(self) -> None:
+        prose = [
+            "VERDICTS above were checked twice.",
+            "TOTALLY fine.",
+            "- Finding the root cause took a while.",
+            "1. Total cost was low.",
+            "**Total** effort was small.",
+            "Note: the finding list is above.",
+        ]
+        text = audit_text([10] * 10) + "\n".join(prose) + "\n"
+        self.assertEqual(self.run_gate(text, audit_text([10] * 10))[0], PASS_CODE)
+
 
 if __name__ == "__main__":
     unittest.main()

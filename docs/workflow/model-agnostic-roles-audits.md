@@ -130,7 +130,7 @@ Copied verbatim from the ledger, grouped by task. Entries the ledger marks "wort
 
 - Task 5: minor (deferred): "in the installed skill folder" gives no locator (folder name appears nowhere); validate command assumes cwd is skill root; mode:"all" rationale omitted and undated
 
-Task 1 also carries one entry the ledger marks "include in final fix wave" (unhashable `independence` in a lock file). It is open.
+Task 1 also carried one entry the ledger marks "include in final fix wave" (unhashable `independence` in a lock file). It was closed by the final fix wave (commits `f8d7b1f`, `0958369`, `59e850b`).
 
 ## Rulings
 
@@ -149,7 +149,7 @@ Copied verbatim from the ledger.
 - The dynamic resolver, dispatcher, and qualification fixture (Plan B) are not implemented. Roles are documented and the scorer enforces independence mode, but nothing resolves profiles or dispatches auditors automatically, and read-only auditing is documented rather than enforced by a snapshot.
 - `score: 100/100` in the workspace validator output is hardcoded and pre-existing (upgrade plan P0-10). It is not evidence of an audit score.
 - The installer OpenCode default path defect (upgrade plan P0-1) is untouched: `scripts/install-skill.py` and the root readme still install to `~/.opencode/skills` while the OpenCode adapter readme documents `~/.config/opencode/skills`.
-- The deferred findings above are open. Three of them (one for Task 3, two for Task 4) are flagged as worth fixing before merge.
+- The deferred findings above were addressed by the final fix wave, except those this Deviations section still lists. Three of them (one for Task 3, two for Task 4) were flagged as worth fixing before merge.
 - The dual-auditor gate required by `SKILL.md` step 9 was not run on this branch's own artifact groups. This is N/A: no auditor dispatch was performed for Plan A. Per-task subagent review and the final whole-branch review stood in for it.
 - The final whole-branch review found one Critical issue (the scorer ignored indented, bulleted, quoted, or bold `FINDING`, `VERDICT`, and `TOTAL` lines, so a decorated `CRITICAL` finding passed the gate), several Important issues (a lock file with a non-string `independence` crashed the scorer; the profile validator accepted wrong-typed containers, crashed on a list-valued harness, and allowed one model for both auditors; the OpenCode profile used an undefined `{agent}` placeholder and `--format json`; the Claude Code command left `Bash` and `NotebookEdit` able to write), and document inconsistencies with the scorer and degraded mode. A fix wave addressed them in three commits: A (scorer), B (profile validator and profiles), and C (workflow documents). That wave closes the deferred Task 1 and Task 2 findings about decorated lines, unhashable `independence`, and unvalidated profile structure, and the three findings flagged worth fixing before merge.
 
@@ -157,8 +157,8 @@ Copied verbatim from the ledger.
 
 | Item | Status |
 |---|---|
-| Scorer tests (`tests/test-score-audit-gate.py`) | Pass, 31 tests |
-| Validator tests (`tests/test-validate-workspace.py`) | Pass, 14 tests |
+| Scorer tests (`tests/test-score-audit-gate.py`) | Pass, 37 tests |
+| Validator tests (`tests/test-validate-workspace.py`) | Pass, 26 tests |
 | `python scripts/validate-workspace.py` | `workspace validation: PASS` |
 | `git diff --check` | Clean |
 | Gate re-score of real round 1 pair | `GATE: FAIL (independence=full, threshold=85)`, exit 1, mean 70.0, as expected |

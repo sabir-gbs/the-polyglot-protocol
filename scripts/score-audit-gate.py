@@ -23,11 +23,12 @@ from pathlib import Path
 
 CRITERIA_COUNT = 10
 THRESHOLDS = {"full": 85, "degraded": 90}
-# A contract line is any line whose first word, after optional whitespace and
-# markdown decoration (bullets, quotes, emphasis, headings, "1."), is a
-# reserved word. The strict shapes below only match at column 0, so a
-# decorated or indented contract line is rejected instead of silently ignored.
-RESERVED_RE = re.compile(r"^[\s>*_`#\-]*(?:\d+\.\s+)?(VERDICT|TOTAL|FINDING)\b")
+# A contract line is any line whose first word, after any run of decoration
+# (whitespace, punctuation, symbols, emoji, underscores, "1." or "1)" list
+# markers), is an ALL-CAPS reserved word. The strict shapes below only match at
+# column 0, so a decorated or indented contract line is rejected instead of
+# silently ignored. Mixed-case prose ("Finding", "Total") is not reserved.
+RESERVED_RE = re.compile(r"^(?:[\W_]|\d+[.)])*(VERDICT|TOTAL|FINDING)\b")
 VERDICT_RE = re.compile(r"^VERDICT (?P<name>.+?): (?P<score>\d+)/10\s*$")
 TOTAL_RE = re.compile(r"^TOTAL: (?P<total>\d+)/100\s*$")
 FINDING_RE = re.compile(r"^FINDING (?P<severity>CRITICAL|MAJOR|MINOR) (?P<where>\S+) (?P<text>.+?)\s*$")
