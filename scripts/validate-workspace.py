@@ -85,6 +85,55 @@ def check_skill_package_sync() -> list[str]:
     return errors
 
 
+def run_script_tests() -> list[str]:
+    """Run the stdlib unittest files under tests/."""
+    errors: list[str] = []
+    for test_file in sorted((ROOT / "tests").glob("test-*.py")):
+        result = subprocess.run(
+            [sys.executable, "-B", str(test_file)],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            print(result.stderr, end="", file=sys.stderr)
+            errors.append(f"script tests failed: {test_file.relative_to(ROOT)}")
+    return errors
+
+
+def check_audit_workflow_references() -> list[str]:
+    """Require the artifact-group audit workflow doc, its references, and a
+    consistent gate threshold in every file that states it.
+
+    Complexity: O(f) in the number of checked files.
+    """
+    errors: list[str] = []
+    doc = ROOT / "docs" / "workflow" / "artifact-group-audit-workflow.md"
+    if not doc.exists():
+        return [f"missing workflow doc: {doc.relative_to(ROOT)}"]
+    scorer = ROOT / "scripts" / "score-audit-gate.py"
+    if not scorer.exists():
+        errors.append(f"missing gate scorer: {scorer.relative_to(ROOT)}")
+
+    needle = "artifact-group-audit-workflow.md"
+    threshold = "`85`"
+    dev_workflow = ROOT / "docs" / "workflow" / "dev-workflow.md"
+    skill = ROOT / "SKILL.md"
+    referrers = (skill, dev_workflow, ROOT / "readme.md", ROOT / "docs" / "AGENTS.md")
+    threshold_files = {doc, dev_workflow, skill}
+
+    for path in referrers:
+        if not path.exists():
+            errors.append(f"missing guidance file: {path.relative_to(ROOT)}")
+        elif needle not in path.read_text(encoding="utf-8"):
+            errors.append(f"{path.relative_to(ROOT)} does not reference {needle}")
+    for path in sorted(threshold_files):
+        if path.exists() and threshold not in path.read_text(encoding="utf-8"):
+            errors.append(f"{path.relative_to(ROOT)} does not state gate threshold {threshold}")
+    return errors
+
+
 def check_files() -> list[str]:
     errors: list[str] = []
     for path in sorted(ADAPTER_READMES):
@@ -112,6 +161,8 @@ def main() -> int:
     errors = run_language_validator()
     errors.extend(run_packaged_language_validator())
     errors.extend(check_files())
+    errors.extend(check_audit_workflow_references())
+    errors.extend(run_script_tests())
     errors.extend(check_skill_package_sync())
 
     if errors:

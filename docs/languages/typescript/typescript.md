@@ -16,7 +16,7 @@ automation.
 
 - **Language target**: Write TypeScript, not plain JavaScript, for new code unless
   the user explicitly requests JavaScript or the project is already JavaScript-only.
-- **Node.js target**: Target Node.js Active LTS `24.16.0` or the current active
+- **Node.js target**: Target Node.js Active LTS `24.21.0` or the current active
   LTS patch for server-side, CLI, test, build, and tooling code. Do not target
   unsupported Node versions.
 - **Current vs LTS**: Do not target a newly released Current Node major for
@@ -41,7 +41,7 @@ automation.
 - **Version pinning**: New projects should include an `engines.node` range in
   `package.json` and, when using pnpm or Yarn, a `packageManager` field. Keep
   local, CI, and production Node versions aligned.
-- **npm baseline**: Use npm `11.13.0` with Node.js `24.16.0` unless the project
+- **npm baseline**: Use npm `11.19.0` with Node.js `24.21.0` unless the project
   lockfile or deployment platform requires another package manager.
 - **Corepack**: If the project uses pnpm or Yarn through Corepack, use the
   repository's configured `packageManager` value. Do not silently upgrade the

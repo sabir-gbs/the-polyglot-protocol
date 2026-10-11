@@ -135,6 +135,8 @@ If you have to ask for these things manually, you need a protocol.
   completeness, and accuracy decisions for each language
 - `docs/language-guidelines.md`: language selection and default-script policy
 - `docs/workflow/dev-workflow.md`: planning, audit, validation, and `N/A` rules
+- `docs/workflow/artifact-group-audit-workflow.md`: per-group dual-auditor
+  audit gate, roles, output contract, and pass rules
 - `scripts/validate-workspace.py`: full local validation
 - `adapters/`: lightweight guidance and human-readable README files for Codex,
   Claude Code, and OpenCode

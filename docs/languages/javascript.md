@@ -6,7 +6,7 @@ JavaScript-family code.
 
 ## Runtime And Package Management
 
-- Target Node.js Active LTS `24.16.0` for server, CLI, and tooling code.
+- Target Node.js Active LTS `24.21.0` for server, CLI, and tooling code.
 - Preserve the existing package manager and module system.
 - Use ESM for new standalone JavaScript unless CommonJS is required.
 

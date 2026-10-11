@@ -24,7 +24,10 @@ or more programming languages.
    its score, remediate all gaps until every criterion reaches `10/10`, and
    report the final total score. If a criterion cannot reach `10/10`, document
    the blocker, evidence, and follow-up requirement before completion.
-9. Run validation when this skill folder is available:
+9. Split work into artifact groups and pass each group through the
+   dual-auditor gate in `docs/workflow/artifact-group-audit-workflow.md`
+   before starting the next group.
+10. Run validation when this skill folder is available:
 
 ```sh
 python scripts/validate-workspace.py
@@ -47,6 +50,9 @@ python scripts/validate-workspace.py
 - Generated code is not complete until a whole-codebase protocol audit reaches
   `100/100` across the rubric, or a documented blocker explains why that target
   is impossible in the current scope.
+- An artifact group passes its audit gate at a mean score of `85` or more from
+  two independent auditors with no `CRITICAL` finding. The gate lets work
+  continue and is not a completion claim.
 - Treat unsupported Docker, Lighthouse, browser, deployment, Git, or CI steps as
   explicit `N/A` items with evidence.
 
@@ -58,6 +64,8 @@ python scripts/validate-workspace.py
 - Examples: `docs/languages/examples.md`
 - Version checks: `docs/languages/install-version-commands.md`
 - Scoring: `docs/languages/scoring-rubric.md`
+- Artifact-group audit gate: `docs/workflow/artifact-group-audit-workflow.md`
+- Gate scorer: `scripts/score-audit-gate.py`
 - LLM failure modes: `docs/languages/top-llm-coding-nuances.md`
 - Current score: `docs/languages/score-report.md`
 

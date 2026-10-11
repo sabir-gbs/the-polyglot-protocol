@@ -80,7 +80,7 @@ Re-check before each upgrade or new project.
 | Area | Baseline | Verification source |
 |---|---:|---|
 | Python | `3.14.5+` target; follow `docs/languages/python/python.md` | python.org and `docs/languages/python/python.md` |
-| Node.js | Active LTS `24.16.0` | `https://nodejs.org/dist/index.json` |
+| Node.js | Active LTS `24.21.0` | `https://nodejs.org/dist/index.json` |
 | TypeScript | `6.0.3` | npm registry `typescript/latest` |
 | Go | `1.26.3` | `https://go.dev/dl/?mode=json` |
 | Rust | `1.95.0` stable | Rust stable channel metadata |

@@ -6,7 +6,7 @@ guide.
 
 ## Runtime And Package Management
 
-- Target Node.js Active LTS `24.16.0` for server, CLI, build, and test code.
+- Target Node.js Active LTS `24.21.0` for server, CLI, build, and test code.
 - Use the package manager implied by the lockfile.
 - Prefer ESM for new projects.
 - Pin dependencies through the lockfile and avoid global installs.

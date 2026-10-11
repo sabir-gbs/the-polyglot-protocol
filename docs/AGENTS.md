@@ -15,6 +15,7 @@ Root guides:
 - `language-guidelines.md`: Language selection, default toolchains, and cross-language code generation rules.
 - `docs/languages/`: Individual guidance files for Bash, C, C#, C++, CSS, Dart, Go, HTML, Java, JavaScript, Kotlin, Lua, PHP, Python, R, Ruby, Rust, Shopify Liquid, SQL, Swift, TypeScript, and Zig.
 - `docs/workflow/dev-workflow.md`: Required workflow for add, change, and update requests.
+- `docs/workflow/artifact-group-audit-workflow.md`: Per-artifact-group dual-auditor audit gate used by the required workflow.
 - `AGENTS.md`: Contributor-facing repository guide and index of rules.
 
 There are no source, test, asset, package, or build directories. If code is added later, use top-level directories such as `src/`, `tests/`, `docs/`, and `assets/`.
@@ -43,7 +44,7 @@ Use Python as the default language for repository scripts. Script work must foll
 
 ## Testing Guidelines
 
-There is no automated test suite. For documentation-only changes, verify Markdown structure, links, headings, commands, and file references. If code is introduced, add tests beside the code or under `tests/`, use descriptive kebab-case filenames, and document the test command here.
+Script tests live under `tests/` and use the standard library `unittest`. Run the gate scorer tests with `python tests/test-score-audit-gate.py`; `python scripts/validate-workspace.py` runs them too. For documentation-only changes, verify Markdown structure, links, headings, commands, and file references. If more code is introduced, add tests under `tests/`, use descriptive kebab-case filenames, and document the test command here.
 
 ## Commit & Pull Request Guidelines
 
