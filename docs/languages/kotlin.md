@@ -24,9 +24,8 @@ coroutines with structured concurrency. Avoid platform types leaking across
 boundaries and keep Android UI code separated from domain logic.
 
 - Do not hard-code secrets or API keys in source. An attacker can decompile the app and find them.
-- On Android, set `android:exported="false"` on components other apps do not need, and guard exported ones with a permission.
-- Keep cryptographic keys in the Android Keystore, not in app code or storage.
-- On the JVM, follow the Java rules: no `ObjectInputStream` on untrusted data, and bind SQL values with `PreparedStatement`.
+- On Android, set `android:exported="false"` on components other apps do not need, and guard exported components that are not public entry points with a permission.
+- Keep cryptographic keys in the Android Keystore.
 
 ## Source Documentation And Comments
 

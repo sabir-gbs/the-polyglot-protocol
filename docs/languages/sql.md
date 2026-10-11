@@ -26,8 +26,8 @@ possible, explicit constraints, indexes with query-plan evidence for risky
 paths, and transaction boundaries. Never concatenate untrusted input into SQL.
 
 - Bind parameters carry data, not code. They cannot stand in for table names, column names, or sort direction.
-- Take identifiers and `ASC` or `DESC` from a fixed allow-list in code, never from user input.
-- Avoid dynamic SQL inside stored procedures. If you cannot, validate or allow-list its inputs.
+- Map the user's choice of identifier or `ASC` or `DESC` to a fixed allow-list in code. Do not paste the raw input into the query.
+- Avoid dynamic SQL inside stored procedures. If you cannot, bind values where the dialect allows, and validate or allow-list the other inputs.
 
 ## Source Documentation And Comments
 

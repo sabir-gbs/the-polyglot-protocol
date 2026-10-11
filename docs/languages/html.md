@@ -25,7 +25,7 @@ layout tables unless the content is truly tabular.
 
 - Render untrusted data only through the template engine's output encoding, and keep its default escaping on.
 - Do not join untrusted data into markup as strings. Use `textContent`, not `innerHTML`, for untrusted text.
-- Do not put untrusted data in `<script>` blocks or event-handler attributes. In CSS, use it only as a property value.
+- Do not put untrusted data in `<script>` blocks or event-handler attributes. In CSS, untrusted data may only be a validated property value.
 - Add a Content Security Policy as a second layer. It does not replace escaping.
 
 ## Source Documentation And Comments
