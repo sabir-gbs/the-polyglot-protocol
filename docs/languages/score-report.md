@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Score: `100/100`
+Structural validation: `PASS`. This is a structural check, not a rubric score.
 
 ## Validation Command
 

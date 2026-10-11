@@ -158,7 +158,6 @@ def main() -> int:
     print(f"language files: {len(LANGUAGE_FILES)}")
     print(f"language readmes: {len(LANGUAGE_README_DIRS)}")
     print(f"operational files: {len(OPERATIONAL_FILES)}")
-    print("score: 100/100")
     return 0
 
 

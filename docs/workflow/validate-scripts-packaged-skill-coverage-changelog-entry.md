@@ -73,3 +73,25 @@ python scripts/validate-workspace.py
 - Full details, audit scoring, and reproducible commands are available in the formal workflow artifacts listed above.
 
 **Detailed notes and CHANGELOG-style entry for this change.**
+
+## Correction (2026-10-11)
+
+Checked against the repository on 2026-10-11, several statements above are not
+true. They stay for history and are corrected here.
+
+- **Docstrings.** The entry says `validate-workspace.py` and
+  `validate-language-guidance.py` use strict Google-style docstrings with
+  `Args:`, `Returns:`, `Raises:` and complexity sections.
+  `validate-language-guidance.py` has no docstrings. In `validate-workspace.py`
+  the module docstring sits after the imports, so Python does not use it.
+- **Packaged copy.** The entry describes a `the-polyglot-protocol/` skill
+  package and sync checks against it. That directory has never existed in this
+  repository's git history (`git log --all -- 'the-polyglot-protocol/*'` is
+  empty), so those checks never run.
+- **Standard.** The entry cites `docs/PYTHON.md`. That file does not exist. The
+  Python guidance is `docs/languages/python/python.md`.
+- **Verification command.** The entry lists
+  `(cd the-polyglot-protocol && python scripts/validate-workspace.py)` as run.
+  That cannot have run, because the directory does not exist.
+- **Audit scores.** The `100/100` results in the sibling artifacts for this
+  change are not supported by the evidence above. Do not rely on them.

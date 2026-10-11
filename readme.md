@@ -194,7 +194,6 @@ language guidance validation: PASS
 language files: 22
 language readmes: 22
 operational files: 11
-score: 100/100
 workspace validation: PASS
 ```
 
@@ -233,7 +232,9 @@ Each coding environment adapter also has a README:
 
 ## Project Status
 
-Current validation score: `100/100`.
+Current validation status: structural checks `PASS` (22 language files, 22
+language readmes, 11 operational files). This is a structural check, not a
+rubric score. Rubric scores are recorded per audit under `docs/workflow/`.
 
 See `docs/languages/score-report.md` for the score report and
 `docs/languages/scoring-rubric.md` for the rubric.
