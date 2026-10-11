@@ -4,7 +4,7 @@
 
 **Goal:** Fix the round 1 P0 findings that live outside the language guidance files: the installer, broken required paths, nonexistent skills, false score claims, and the false changelog entry.
 
-**Architecture:** Six tasks. Task 4 runs first, Task 5 (comment pass) runs after Task 1, Task 6 (guidance rule) runs last. Task 1 rewrites `scripts/install-skill.py` as an allowlist installer with target guards, staged replacement, and `--dry-run`, with tests, and updates the readme install section. Task 2 applies exact text replacements to documents. Task 3 removes the hardcoded score and corrects the changelog entry.
+**Architecture:** Seven tasks. Task 4 runs first. Task 5 (comment pass) runs after Tasks 1, 3 and 4. Task 6 (rule in the protocol's guidance) and Task 7 (validator check) run last, in that order. Task 1 rewrites `scripts/install-skill.py` as an allowlist installer with target guards, staged replacement, and `--dry-run`, with tests, and updates the readme install section. Task 2 applies exact text replacements to documents. Task 3 removes the hardcoded score and corrects the changelog entry.
 
 **Tech Stack:** Python 3.14 standard library (`argparse`, `shutil`, `pathlib`, `unittest`, `subprocess`), Markdown.
 
@@ -872,30 +872,75 @@ git commit -m "Rewrite code comments and docstrings in plain language"
 
 ---
 
-### Task 6: Put the comment rule in the protocol's guidance
+### Task 6: Make the comment rule part of the protocol's guidance
+
+The rule is a protocol requirement, not a note about one run. It goes into every
+protocol-level file that states how code is written, checked, and scored.
 
 **Files:**
-- Modify: `docs/language-guidelines.md` (Universal Rules section)
-- Modify: `docs/languages/top-llm-coding-nuances.md` (Common Failure Modes)
+- Modify: `SKILL.md`, `docs/language-guidelines.md`, `docs/languages/pre-codegen-checklist.md`, `docs/languages/scoring-rubric.md`, `docs/languages/language-file-template.md`, `docs/languages/top-llm-coding-nuances.md`
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: two guidance entries. No code.
+- Produces: the rule stated once as the canonical text in `docs/language-guidelines.md`, and short pointers elsewhere. No code.
 
-- [ ] **Step 1: Add the Universal Rules bullet**
+Do not edit any `docs/languages/<language>.md` file here. Adding one line to each language file's `## Source Documentation And Comments` section is Wave 2 work.
 
-In `docs/language-guidelines.md`, under `## Universal Rules`, add this bullet at the end of the bullet list:
+Apply each insertion exactly once. If an anchor is not found exactly once, stop and report BLOCKED.
+
+- [ ] **Step 1: Canonical text in `docs/language-guidelines.md`**
+
+Under `## Universal Rules`, add this bullet at the end of the bullet list:
 
 ```markdown
 - Write code comments and docstrings in plain US English at about a 6th grade
   reading level. Technical terms are fine. Say why the code does something, not
   what the next line obviously does. Leave out filler, hype, edit narration,
-  banners, and emoji.
+  banners, and emoji. `scripts/validate-workspace.py` checks this for the
+  repository's own scripts and tests.
 ```
 
-- [ ] **Step 2: Add the failure mode**
+- [ ] **Step 2: `SKILL.md` Core Rules**
 
-In `docs/languages/top-llm-coding-nuances.md`, under `## Common Failure Modes`, add this bullet after the `**False confidence**` bullet:
+After the bullet that begins `- Do not invent APIs, configuration keys, package names, services, flags, or`, add:
+
+```markdown
+- Write code comments and docstrings in plain US English at about a 6th grade
+  reading level. Technical terms are fine. No filler, hype, or edit narration.
+  See `docs/language-guidelines.md`.
+```
+
+- [ ] **Step 3: `docs/languages/pre-codegen-checklist.md`**
+
+After step `10.` (the one that ends `items in the workflow artifacts.`), add:
+
+```markdown
+11. Plan code comments and docstrings to follow the plain-language comment rule
+    in `docs/language-guidelines.md`.
+```
+
+- [ ] **Step 4: `docs/languages/scoring-rubric.md`**
+
+Under `## Scoring Rules`, add this bullet at the end of the list:
+
+```markdown
+- Criterion 4 includes the plain-language comment rule in
+  `docs/language-guidelines.md`. Comments that restate the code, narrate edits,
+  hype the result, or pad with filler lower that score.
+```
+
+- [ ] **Step 5: `docs/languages/language-file-template.md`**
+
+Under `## Writing Rules`, add this bullet at the end of the list:
+
+```markdown
+- Require comments and docstrings in plain US English at about a 6th grade
+  reading level, as `docs/language-guidelines.md` states.
+```
+
+- [ ] **Step 6: `docs/languages/top-llm-coding-nuances.md`**
+
+Under `## Common Failure Modes`, add this bullet after the `**False confidence**` bullet:
 
 ```markdown
 - **Slop comments**: comments that restate the code, narrate edits, hype the
@@ -904,18 +949,162 @@ In `docs/languages/top-llm-coding-nuances.md`, under `## Common Failure Modes`, 
   technical terms, and explain why, not what.
 ```
 
-- [ ] **Step 3: Verify**
+- [ ] **Step 7: Verify**
 
-Run: `grep -n "6th grade" docs/language-guidelines.md docs/languages/top-llm-coding-nuances.md`
-Expected: two matching lines, one per file.
+Run: `grep -ln "6th grade" SKILL.md docs/language-guidelines.md docs/languages/language-file-template.md docs/languages/top-llm-coding-nuances.md`
+Expected: all four files listed.
+Run: `grep -n "plain-language comment rule" docs/languages/pre-codegen-checklist.md docs/languages/scoring-rubric.md`
+Expected: one matching line in each file.
 Run: `python -B scripts/validate-workspace.py 2>&1 | tail -3`
 Expected: `workspace validation: PASS`.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add docs/language-guidelines.md docs/languages/top-llm-coding-nuances.md
-git commit -m "Add plain-language comment rule to protocol guidance"
+git add SKILL.md docs/language-guidelines.md docs/languages/pre-codegen-checklist.md docs/languages/scoring-rubric.md docs/languages/language-file-template.md docs/languages/top-llm-coding-nuances.md
+git commit -m "Make the plain-language comment rule part of the protocol"
+```
+
+---
+
+### Task 7: Enforce the comment rule in the validator
+
+Run this after Task 5, so the repository's scripts and tests already comply when the check turns on.
+
+**Files:**
+- Modify: `scripts/validate-workspace.py`
+- Modify: `tests/test-validate-workspace.py`
+
+**Interfaces:**
+- Consumes: the comment pass from Task 5.
+- Produces: `comment_texts(source: str) -> list[tuple[int, str]]`, `comment_style_problems(source: str) -> list[str]`, `check_comment_style() -> list[str]`, and constants `COMMENT_BANNED`, `MAX_COMMENT_SENTENCE_WORDS`.
+
+- [ ] **Step 1: Write the failing tests**
+
+Add this class to `tests/test-validate-workspace.py`, before the `if __name__` block:
+
+```python
+class CommentStyleTest(unittest.TestCase):
+    def test_flags_filler_phrases_in_comments(self) -> None:
+        problems = VW.comment_style_problems("# Note that this is robust.\nx = 1\n")
+        self.assertTrue(any("note that" in p for p in problems))
+        self.assertTrue(any("robust" in p for p in problems))
+
+    def test_flags_filler_in_docstrings(self) -> None:
+        source = 'def f():\n    """Simply ensure that the value is set."""\n    return 1\n'
+        problems = VW.comment_style_problems(source)
+        self.assertTrue(any("simply" in p for p in problems))
+        self.assertTrue(any("ensure that" in p for p in problems))
+
+    def test_flags_module_docstring(self) -> None:
+        problems = VW.comment_style_problems('"""A comprehensive helper."""\nx = 1\n')
+        self.assertTrue(any("comprehensive" in p for p in problems))
+
+    def test_flags_long_sentences(self) -> None:
+        long_sentence = " ".join(["word"] * 30) + "."
+        problems = VW.comment_style_problems(f"# {long_sentence}\nx = 1\n")
+        self.assertTrue(any("words" in p for p in problems))
+
+    def test_plain_comments_pass(self) -> None:
+        source = '"""Check file names."""\n# Skip hidden folders because caches live there.\nx = 1\n'
+        self.assertEqual(VW.comment_style_problems(source), [])
+
+    def test_words_that_only_contain_a_banned_word_pass(self) -> None:
+        self.assertEqual(VW.comment_style_problems("# This check gains robustness.\n"), [])
+
+    def test_banned_words_in_string_literals_are_not_comments(self) -> None:
+        self.assertEqual(VW.comment_style_problems('BANNED = ("robust", "seamless")\n'), [])
+
+    def test_repository_scripts_and_tests_follow_the_rule(self) -> None:
+        self.assertEqual(VW.check_comment_style(), [])
+```
+
+- [ ] **Step 2: Run them to verify they fail**
+
+Run: `python -B tests/test-validate-workspace.py 2>&1 | tail -6`
+Expected: FAIL with `AttributeError: module 'validate_workspace' has no attribute 'comment_style_problems'`.
+
+- [ ] **Step 3: Write the implementation**
+
+In `scripts/validate-workspace.py` add `import ast`, `import io` and `import tokenize` to the import block. Add these constants next to the other module constants:
+
+```python
+COMMENT_BANNED = (
+    "note that",
+    "worth noting",
+    "it's worth",
+    "importantly",
+    "robust",
+    "seamless",
+    "seamlessly",
+    "leverage",
+    "comprehensive",
+    "ensure that",
+    "simply",
+    "gracefully",
+    "cutting-edge",
+)
+MAX_COMMENT_SENTENCE_WORDS = 25
+```
+
+Add these functions before `check_files`:
+
+```python
+def comment_texts(source: str) -> list[tuple[int, str]]:
+    """Return (line, text) for each comment and docstring in Python source."""
+    found: list[tuple[int, str]] = []
+    for token in tokenize.generate_tokens(io.StringIO(source).readline):
+        if token.type == tokenize.COMMENT:
+            found.append((token.start[0], token.string.lstrip("# ").strip()))
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            doc = ast.get_docstring(node, clean=False)
+            if doc and node.body:
+                found.append((node.body[0].lineno, doc))
+    return found
+
+
+def comment_style_problems(source: str) -> list[str]:
+    """List filler phrases and over-long sentences in comments and docstrings."""
+    problems: list[str] = []
+    for line, text in comment_texts(source):
+        lowered = text.lower()
+        for phrase in COMMENT_BANNED:
+            if re.search(rf"\b{re.escape(phrase)}\b", lowered):
+                problems.append(f"line {line}: filler phrase {phrase!r}")
+        for sentence in re.split(r"(?<=[.!?])\s+", text):
+            if len(sentence.split()) > MAX_COMMENT_SENTENCE_WORDS:
+                problems.append(f"line {line}: sentence over {MAX_COMMENT_SENTENCE_WORDS} words")
+    return problems
+
+
+def check_comment_style() -> list[str]:
+    """Apply the plain-language comment rule to scripts/ and tests/."""
+    errors: list[str] = []
+    for directory in ("scripts", "tests"):
+        for path in sorted((ROOT / directory).glob("*.py")):
+            for problem in comment_style_problems(path.read_text(encoding="utf-8")):
+                errors.append(f"{path.relative_to(ROOT)}: {problem}")
+    return errors
+```
+
+In `main`, add `errors.extend(check_comment_style())` after `errors.extend(check_core_docs_model_neutral())`.
+
+- [ ] **Step 4: Run the tests**
+
+Run: `python -B tests/test-validate-workspace.py 2>&1 | tail -6`
+Expected: `OK`. If `test_repository_scripts_and_tests_follow_the_rule` fails, list the reported problems and rewrite those comments in plain language; do not weaken the check or the word list.
+
+- [ ] **Step 5: Verify**
+
+Run: `python -B scripts/validate-workspace.py 2>&1 | tail -3`
+Expected: `workspace validation: PASS`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add scripts/validate-workspace.py tests/test-validate-workspace.py
+git commit -m "Check the plain-language comment rule in the validator"
 ```
 
 ---
