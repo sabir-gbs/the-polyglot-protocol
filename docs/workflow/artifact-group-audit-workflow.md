@@ -26,20 +26,33 @@ It extends `dev-workflow.md`. It does not replace the audit loops defined there.
 
 ## Roles
 
-| Role | Model and effort | Responsibility |
-|---|---|---|
-| Orchestrator | Sonnet 5.5, high | Plans, dispatches, builds the artifact group and audit prompt, computes scores, applies fixes |
-| `haiku-worker` (up to 8) | Haiku 5.5, max | Basic operations only: read, list, grep, copy verbatim. Never scores, judges, or edits |
-| `sol-auditor` | Codex gpt-6.1-sol, high | Independent read-only audit. Scores 10 criteria out of 100 |
-| `opus-auditor` | Opus 5.5, high | Independent read-only audit. Scores 10 criteria out of 100 |
+Roles are defined by capability and permission. Which model fills a role comes
+from the selected profile (see `role-resolution.md`), never from this document.
+
+| Role | Must be able to | May touch | Count |
+|---|---|---|---|
+| Orchestrator | Plan long-horizon work, use tools, dispatch roles, apply fixes | Read and write; the only role that edits | 1 |
+| Auditor A, Auditor B | Read many files, score ten criteria, verify facts on the web with cited sources, emit the output contract | Read-only; web allowed; no edits; no spawning | 2 |
+| Worker | Read, list, grep, and copy text verbatim | Read only; no web | up to 8 |
+
+The orchestrator is the session the user is already in. Every other role is a
+command dispatched through a harness.
 
 Rules:
 
 - Auditors are read-only and never edit files.
 - Auditors run in parallel and must not see each other's output.
 - Only the orchestrator fixes findings.
-- Verify each model is available locally before dispatch. If one is not, record
-  the blocker. Do not substitute a different model or self-audit silently.
+- **Independence.** Auditor A and Auditor B come from different model families.
+- **Capability check.** Before dispatch, confirm each model can do what its role
+  needs. A model that cannot is a blocker. Do not substitute a different model
+  or self-audit silently.
+- **Read-only is verified.** Snapshot the tree before and after each auditor or
+  worker run. Any change invalidates that run, whatever the harness claims.
+- **Degraded mode.** If two families are not available, two different models from
+  one family are allowed. Record `degraded independence` in the audit log. The
+  pass bar rises to `90` and the deterministic checks must pass. Running the same
+  model twice is a blocker.
 
 ## Artifact Group
 
@@ -55,26 +68,29 @@ tests. Build each group as:
 
 Run these steps for each artifact group.
 
-1. **Prep.** The orchestrator dispatches up to 8 `haiku-worker` agents to read,
+1. **Prep.** The orchestrator dispatches up to 8 workers to read,
    list, and grep the group's files. This builds the file inventory and
    surfaces obvious defects before audit.
-2. **Audit.** `sol-auditor` and `opus-auditor` run in parallel against the same
+2. **Audit.** Auditor A and Auditor B run in parallel against the same
    files and the same audit prompt. Each scores 10 criteria out of 100.
-3. **Check.** One `haiku-worker` greps each auditor's verdict lines and severity
+3. **Check.** One worker greps each auditor's verdict lines and severity
    tags and copies them verbatim into the audit log. It does not summarize or
    interpret them.
 4. **Score.** The orchestrator re-adds each auditor's criterion scores and
    takes the mean of the two totals by running:
 
    ```sh
-   python scripts/score-audit-gate.py <sol-auditor-output> <opus-auditor-output>
+   python scripts/score-audit-gate.py <auditor-a-output> <auditor-b-output> \
+     [--lock resolved-roles.json | --independence full|degraded]
    ```
 
-   The script ignores each advertised `TOTAL`, reports any discrepancy, and
-   exits `0` when the gate passes, `1` when it fails, and `2` when an auditor
-   output is invalid. Record its output in the audit log.
-5. **Gate.** The group passes when the mean is `85` or more and neither auditor
-   raised a `CRITICAL` finding.
+   The script ignores each advertised `TOTAL`, reports any discrepancy, rejects
+   malformed contract lines and mismatched criterion names, and exits `0` when
+   the gate passes, `1` when it fails, and `2` when an input is invalid. Record
+   its output in the audit log.
+5. **Gate.** In `full` independence the group passes when the mean is `85` or
+   more. In `degraded` independence the mean must be `90` or more. In both modes
+   neither auditor may raise a `CRITICAL` finding.
 6. **Fix or stop.**
    - Pass: record the result, start the next group, and queue the group for
      maintainer review.

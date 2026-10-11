@@ -51,8 +51,9 @@ python scripts/validate-workspace.py
   `100/100` across the rubric, or a documented blocker explains why that target
   is impossible in the current scope.
 - An artifact group passes its audit gate at a mean score of `85` or more from
-  two independent auditors with no `CRITICAL` finding. The gate lets work
-  continue and is not a completion claim.
+  two independent auditors with no `CRITICAL` finding (`90` when only one model
+  family is available). The gate lets work continue and is not a completion
+  claim. Model names live only in `profiles/`.
 - Treat unsupported Docker, Lighthouse, browser, deployment, Git, or CI steps as
   explicit `N/A` items with evidence.
 
@@ -66,6 +67,8 @@ python scripts/validate-workspace.py
 - Scoring: `docs/languages/scoring-rubric.md`
 - Artifact-group audit gate: `docs/workflow/artifact-group-audit-workflow.md`
 - Gate scorer: `scripts/score-audit-gate.py`
+- Role resolution and harness reference: `docs/workflow/role-resolution.md`
+- Model profiles: `profiles/`
 - LLM failure modes: `docs/languages/top-llm-coding-nuances.md`
 - Current score: `docs/languages/score-report.md`
 

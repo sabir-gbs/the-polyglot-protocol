@@ -16,6 +16,8 @@ Root guides:
 - `docs/languages/`: Individual guidance files for Bash, C, C#, C++, CSS, Dart, Go, HTML, Java, JavaScript, Kotlin, Lua, PHP, Python, R, Ruby, Rust, Shopify Liquid, SQL, Swift, TypeScript, and Zig.
 - `docs/workflow/dev-workflow.md`: Required workflow for add, change, and update requests.
 - `docs/workflow/artifact-group-audit-workflow.md`: Per-artifact-group dual-auditor audit gate used by the required workflow.
+- `docs/workflow/role-resolution.md`: Harness classes, capability contract, and observed harnesses.
+- `profiles/`: Model profiles (`default`, `opencode-open-weights`, `template`) used by the audit gate.
 - `AGENTS.md`: Contributor-facing repository guide and index of rules.
 
 There are no source, test, asset, package, or build directories. If code is added later, use top-level directories such as `src/`, `tests/`, `docs/`, and `assets/`.

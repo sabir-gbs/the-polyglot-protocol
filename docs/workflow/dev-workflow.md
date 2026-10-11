@@ -237,13 +237,16 @@ and criteria sources are in `docs/workflow/artifact-group-audit-workflow.md`.
 
 Summary:
 
-1. Prep: up to 8 `haiku-worker` agents read, list, and grep the group's files.
-2. Audit: `sol-auditor` and `opus-auditor` score the group independently, in
-   parallel, read-only, across 10 criteria out of `100`.
-3. Check: `haiku-worker` copies verdict lines and severity tags verbatim.
+1. Prep: up to 8 workers read, list, and grep the group's files.
+2. Audit: Auditor A and Auditor B, from different model families, score the
+   group independently, in parallel, read-only, across 10 criteria out of `100`.
+3. Check: a worker copies verdict lines and severity tags verbatim.
 4. Score: the orchestrator runs `scripts/score-audit-gate.py`, which re-adds
    each total and takes the mean.
-5. Gate: pass at a mean of `85` or more with no `CRITICAL` finding.
+5. Gate: pass at a mean of `85` or more with no `CRITICAL` finding. When two
+   model families are not available the gate runs in degraded independence and
+   the bar is `90`. Models come from `profiles/`; see
+   `docs/workflow/role-resolution.md`.
 6. Fix every finding and re-audit as round + 1. If the gate still fails after
    round 3, stop and report findings and scores to the maintainer.
 

@@ -137,6 +137,9 @@ If you have to ask for these things manually, you need a protocol.
 - `docs/workflow/dev-workflow.md`: planning, audit, validation, and `N/A` rules
 - `docs/workflow/artifact-group-audit-workflow.md`: per-group dual-auditor
   audit gate, roles, output contract, and pass rules
+- `docs/workflow/role-resolution.md`: how audit roles map to models and
+  harnesses
+- `profiles/`: default and open-weight model profiles, and a blank template
 - `scripts/validate-workspace.py`: full local validation
 - `adapters/`: lightweight guidance and human-readable README files for Codex,
   Claude Code, and OpenCode
