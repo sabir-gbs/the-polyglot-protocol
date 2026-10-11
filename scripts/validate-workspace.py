@@ -1,8 +1,11 @@
 """Check that the workspace follows the rules of The Polyglot Protocol.
 
 Checks file names, language guidance files, profiles, the audit workflow files,
-and the script tests. Prints "workspace validation: PASS" and exits 0 when all
-checks pass. Prints each problem and exits 1 otherwise.
+and the script tests. Also checks that the core docs name no model, and that
+a packaged copy of the scripts matches the root scripts.
+
+Prints "workspace validation: PASS" and exits 0 when all checks pass.
+Prints each problem and exits 1 otherwise.
 """
 
 from __future__ import annotations
@@ -116,7 +119,8 @@ def run_script_tests() -> list[str]:
 def check_audit_workflow_references() -> list[str]:
     """Check that the audit workflow doc and the scorer exist.
 
-    Check that the guidance files link the doc and state the gate threshold.
+    Check that SKILL.md, dev-workflow.md, readme.md and docs/AGENTS.md link the doc.
+    Check that the doc, dev-workflow.md and SKILL.md state the gate threshold.
 
     Complexity: O(f) in the number of checked files.
     """
