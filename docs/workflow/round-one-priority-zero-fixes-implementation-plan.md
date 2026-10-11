@@ -4,7 +4,7 @@
 
 **Goal:** Fix the round 1 P0 findings that live outside the language guidance files: the installer, broken required paths, nonexistent skills, false score claims, and the false changelog entry.
 
-**Architecture:** Seven tasks. Task 4 runs first. Task 5 (comment pass) runs after Tasks 1, 3 and 4. Task 6 (rule in the protocol's guidance) and Task 7 (validator check) run last, in that order. Task 1 rewrites `scripts/install-skill.py` as an allowlist installer with target guards, staged replacement, and `--dry-run`, with tests, and updates the readme install section. Task 2 applies exact text replacements to documents. Task 3 removes the hardcoded score and corrects the changelog entry.
+**Architecture:** Six tasks. Task 4 runs first. Task 5 (comment pass) runs after Tasks 1, 3 and 4. Task 6 (basic rule and comment rule in the protocol's guidance) runs last. Task 7 is optional hardening and is not planned. Task 1 rewrites `scripts/install-skill.py` as an allowlist installer with target guards, staged replacement, and `--dry-run`, with tests, and updates the readme install section. Task 2 applies exact text replacements to documents. Task 3 removes the hardcoded score and corrects the changelog entry.
 
 **Tech Stack:** Python 3.14 standard library (`argparse`, `shutil`, `pathlib`, `unittest`, `subprocess`), Markdown.
 
@@ -24,7 +24,7 @@
   "robust", "seamless", "leverage", "comprehensive", "ensure that", "simply".
   Keep sentences under about 20 words. Every code-writing dispatch repeats this rule.
 - `python -B scripts/validate-workspace.py` must end with `workspace validation: PASS` at the end of every task.
-- Exit codes for the installer: `0` installed or dry-run ok, `2` refused or invalid.
+- Installer: a refusal raises `SystemExit` with a message (exit `1`), as the existing script does.
 
 ## Out Of Scope
 
@@ -35,26 +35,37 @@
 
 | File | Responsibility |
 |---|---|
-| `scripts/install-skill.py` | Allowlist copy, target guards, staged replace, dry run |
-| `tests/test-install-skill.py` | Installer behavior including a self-validation of the installed copy |
+| `scripts/install-skill.py` | Correct target paths, guard on force replace, skip junk |
+| `tests/test-install-skill.py` | Five tests: paths, junk skipped, force guards, installed copy validates |
 | `readme.md` | Install commands, quick start, validation output, project status |
 | `docs/languages/index.md`, `maintenance-policy.md`, `pre-codegen-checklist.md`, `docs/AGENTS.md`, `docs/workflow/dev-workflow.md`, `SKILL.md` | Path and skill-name corrections |
-| `scripts/validate-language-guidance.py`, `tests/test-validate-language-guidance.py` | Remove hardcoded score; test that none is printed |
+| `scripts/validate-language-guidance.py` | Remove the hardcoded score |
 | `contributing.md`, `docs/languages/score-report.md` | Remove the score claim |
 | `docs/workflow/validate-scripts-packaged-skill-coverage-changelog-entry.md` | Dated correction note |
 
 ---
 
-### Task 1: Rewrite the installer and its readme commands
+### Task 1: Fix installer target paths, guard force replace, skip junk files
+
+Minimal path. Desired effects, and only these:
+
+- E1: `--agent opencode` and `--agent codex` install where those agents load skills.
+- E2: `--force` can never delete an unrelated directory.
+- E3: the installed copy has no secrets, caches, run scratch, tests, or plan and audit logs.
+- E4: the readme one-liners work on a second run.
+
+Targeted edits to the existing `scripts/install-skill.py`. No `--dry-run`, no staging
+directory, no backup, no allowlist, no new flags. Accepted residual: a copy that fails
+halfway leaves a partial install, and re-running with `--force` fixes it.
 
 **Files:**
-- Modify: `scripts/install-skill.py` (replace the whole file)
-- Create: `tests/test-install-skill.py`
-- Modify: `readme.md` (Quick Start and One-Line Install sections)
+- Modify: `scripts/install-skill.py` (targeted edits)
+- Create: `tests/test-install-skill.py` (five tests)
+- Modify: `readme.md` (Quick Start and One-Line Install only)
 
 **Interfaces:**
-- Consumes: nothing.
-- Produces: `scripts/install-skill.py` CLI `install-skill.py [--agent codex|claude-code|opencode] [--target PATH] [--force] [--dry-run]`. Python API: `install(source: Path, target: Path, *, force: bool, dry_run: bool, home: Path) -> list[str]`, `InstallError`, `DEFAULT_TARGETS`, `INCLUDE`, `SKILL_NAME`.
+- Consumes: the existing `copy_project(target, *, force)`, `DEFAULT_TARGETS`, `EXCLUDES`.
+- Produces: the same CLI; `copy_project` raises `SystemExit` when a replace is unsafe.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -77,119 +88,54 @@ INSTALL = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = INSTALL
 SPEC.loader.exec_module(INSTALL)
 
-NAME = INSTALL.SKILL_NAME
+NAME = "the-polyglot-protocol"
 
 
 class InstallSkillTest(unittest.TestCase):
     def setUp(self) -> None:
         self._tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmp.cleanup)
-        self.tmp = Path(self._tmp.name).resolve()
-        self.home = self.tmp / "home"
-        self.home.mkdir()
-        self.target = self.tmp / "skills" / NAME
+        self.base = Path(self._tmp.name).resolve()
+        self.target = self.base / "skills" / NAME
 
-    def run_install(self, **kwargs: object) -> list[str]:
-        options = {"force": False, "dry_run": False, "home": self.home}
-        options.update(kwargs)
-        return INSTALL.install(ROOT, self.target, **options)  # type: ignore[arg-type]
+    def test_default_targets_use_the_paths_agents_read(self) -> None:
+        targets = {k: v.as_posix() for k, v in INSTALL.DEFAULT_TARGETS.items()}
+        self.assertTrue(targets["opencode"].endswith(f".config/opencode/skills/{NAME}"))
+        self.assertTrue(targets["codex"].endswith(f".agents/skills/{NAME}"))
 
-    def make_previous_install(self) -> None:
-        self.target.mkdir(parents=True)
-        (self.target / "SKILL.md").write_text(f"---\nname: {NAME}\n---\nold\n", encoding="utf-8")
-        (self.target / "old.txt").write_text("old", encoding="utf-8")
-
-    # --- what is copied ----------------------------------------------------
-    def test_installs_the_allowlist_only(self) -> None:
-        self.run_install()
-        self.assertTrue((self.target / "SKILL.md").is_file())
-        self.assertTrue((self.target / "docs" / "languages" / "python.md").is_file())
-        self.assertTrue((self.target / "profiles" / "default.md").is_file())
+    def test_copy_skips_tests_scratch_and_run_logs(self) -> None:
+        INSTALL.copy_project(self.target, force=False)
         self.assertFalse((self.target / "tests").exists())
-        workflow = sorted(p.name for p in (self.target / "docs" / "workflow").iterdir())
+        self.assertFalse((self.target / ".superpowers").exists())
+        kept = sorted(p.name for p in (self.target / "docs" / "workflow").iterdir())
         self.assertEqual(
-            workflow,
+            kept,
             ["artifact-group-audit-workflow.md", "dev-workflow.md", "role-resolution.md"],
         )
 
-    def test_never_copies_env_files_or_caches(self) -> None:
-        self.run_install()
-        names = {p.name for p in self.target.rglob("*")}
-        self.assertFalse({n for n in names if n.startswith(".env") or n == "__pycache__"})
+    def test_force_refuses_a_directory_that_is_not_a_skill_install(self) -> None:
+        self.target.mkdir(parents=True)
+        (self.target / "keep.txt").write_text("keep", encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            INSTALL.copy_project(self.target, force=True)
+        self.assertTrue((self.target / "keep.txt").exists())
+
+    def test_force_refuses_wrong_name_and_the_source_tree(self) -> None:
+        other = self.base / "other"
+        other.mkdir()
+        for bad in (other, ROOT, ROOT.parent):
+            with self.subTest(target=str(bad)):
+                with self.assertRaises(SystemExit):
+                    INSTALL.copy_project(bad, force=True)
 
     def test_installed_copy_validates_itself(self) -> None:
-        self.run_install()
+        INSTALL.copy_project(self.target, force=False)
         result = subprocess.run(
             [sys.executable, "-B", "scripts/validate-workspace.py"],
             cwd=self.target, text=True, capture_output=True, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("workspace validation: PASS", result.stdout)
-
-    # --- target guards -----------------------------------------------------
-    def test_refuses_existing_target_without_force(self) -> None:
-        self.make_previous_install()
-        with self.assertRaises(INSTALL.InstallError):
-            self.run_install()
-
-    def test_refuses_force_over_a_directory_that_is_not_a_previous_install(self) -> None:
-        self.target.mkdir(parents=True)
-        (self.target / "precious.txt").write_text("keep", encoding="utf-8")
-        with self.assertRaises(INSTALL.InstallError):
-            self.run_install(force=True)
-        self.assertTrue((self.target / "precious.txt").exists())
-
-    def test_refuses_target_with_wrong_leaf_name(self) -> None:
-        with self.assertRaises(INSTALL.InstallError):
-            INSTALL.install(ROOT, self.tmp / "skills", force=True, dry_run=False, home=self.home)
-
-    def test_refuses_the_source_its_parents_and_children(self) -> None:
-        for target in (ROOT, ROOT.parent, ROOT / "sub" / NAME):
-            with self.subTest(target=str(target)):
-                with self.assertRaises(INSTALL.InstallError):
-                    INSTALL.install(ROOT, target, force=True, dry_run=False, home=self.home)
-
-    def test_refuses_home_and_filesystem_root(self) -> None:
-        for target in (self.home, Path(self.home.anchor)):
-            with self.subTest(target=str(target)):
-                with self.assertRaises(INSTALL.InstallError):
-                    INSTALL.install(ROOT, target, force=True, dry_run=False, home=self.home)
-
-    # --- replacement safety -------------------------------------------------
-    def test_force_replaces_a_previous_install(self) -> None:
-        self.make_previous_install()
-        self.run_install(force=True)
-        self.assertFalse((self.target / "old.txt").exists())
-        self.assertIn("The Polyglot Protocol", (self.target / "SKILL.md").read_text(encoding="utf-8"))
-
-    def test_failed_copy_keeps_the_previous_install(self) -> None:
-        self.make_previous_install()
-        original = INSTALL.copy_allowlist
-
-        def boom(source: Path, dest: Path) -> list[str]:
-            raise OSError("disk full")
-
-        INSTALL.copy_allowlist = boom
-        try:
-            with self.assertRaises(OSError):
-                self.run_install(force=True)
-        finally:
-            INSTALL.copy_allowlist = original
-        self.assertTrue((self.target / "old.txt").exists())
-        self.assertFalse((self.target.parent / f".{NAME}.staging").exists())
-
-    def test_dry_run_writes_nothing(self) -> None:
-        planned = self.run_install(dry_run=True)
-        self.assertIn("SKILL.md", planned)
-        self.assertFalse(self.target.exists())
-        self.assertFalse(self.target.parent.exists())
-
-    # --- defaults -----------------------------------------------------------
-    def test_default_targets_use_current_agent_paths(self) -> None:
-        targets = {k: v.as_posix() for k, v in INSTALL.DEFAULT_TARGETS.items()}
-        self.assertTrue(targets["opencode"].endswith(f".config/opencode/skills/{NAME}"))
-        self.assertTrue(targets["codex"].endswith(f".agents/skills/{NAME}"))
-        self.assertTrue(targets["claude-code"].endswith(f".claude/skills/{NAME}"))
 
 
 if __name__ == "__main__":
@@ -198,258 +144,81 @@ if __name__ == "__main__":
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `python -B tests/test-install-skill.py 2>&1 | tail -6`
-Expected: FAIL with `AttributeError: module 'install_skill' has no attribute 'SKILL_NAME'`.
+Run: `python -B tests/test-install-skill.py 2>&1 | tail -8`
+Expected: FAIL. The path test fails on the old defaults, and the copy test finds `tests` in the copy.
 
-- [ ] **Step 3: Write the implementation**
+- [ ] **Step 3: Make the edits to `scripts/install-skill.py`**
 
-Replace `scripts/install-skill.py` with:
+1. In `DEFAULT_TARGETS`, set `codex` to `Path.home() / ".agents" / "skills" / "the-polyglot-protocol"` and `opencode` to `Path.home() / ".config" / "opencode" / "skills" / "the-polyglot-protocol"`. Leave `claude-code` alone.
+2. Add `SKILL_NAME = "the-polyglot-protocol"` near the top, and extend `EXCLUDES` with `".superpowers"`, `"tests"`, `".pytest_cache"`, `".mypy_cache"`, `".ruff_cache"`, `"node_modules"`.
+3. Add `WORKFLOW_KEEP = {"dev-workflow.md", "artifact-group-audit-workflow.md", "role-resolution.md"}`.
+4. Replace the `ignore` function inside `copy_project` with:
 
 ```python
-"""Install The Polyglot Protocol skill into an agent's skill directory.
+    def ignore(directory: str, names: list[str]) -> set[str]:
+        skip = {n for n in names if n in EXCLUDES or n.startswith(".env")}
+        if Path(directory).name == "workflow":
+            skip |= {n for n in names if n not in WORKFLOW_KEEP}
+        return skip
+```
 
-Copies an allowlist of skill files, not the whole repository. Refuses unsafe
-targets. Replaces an existing install by staging the new copy first, so a failed
-copy never loses the previous install.
+5. Add this function above `copy_project`, and call `check_replace_target(target)` right before the existing `shutil.rmtree(target)` (inside the branch where the target exists and `force` is set):
 
-Exit codes: 0 installed (or dry run), 2 refused or invalid.
-"""
-
-from __future__ import annotations
-
-import argparse
-import shutil
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-SKILL_NAME = "the-polyglot-protocol"
-
-DEFAULT_TARGETS = {
-    "codex": Path.home() / ".agents" / "skills" / SKILL_NAME,
-    "claude-code": Path.home() / ".claude" / "skills" / SKILL_NAME,
-    "opencode": Path.home() / ".config" / "opencode" / "skills" / SKILL_NAME,
-}
-
-INCLUDE = (
-    "SKILL.md",
-    "AGENTS.md",
-    "readme.md",
-    "contributing.md",
-    "security.md",
-    "license.md",
-    "docs/AGENTS.md",
-    "docs/language-guidelines.md",
-    "docs/languages",
-    "docs/workflow/dev-workflow.md",
-    "docs/workflow/artifact-group-audit-workflow.md",
-    "docs/workflow/role-resolution.md",
-    "profiles",
-    "scripts",
-    "adapters",
-)
-SKIP_NAMES = {"__pycache__", ".git", ".venv", ".DS_Store"}
-
-
-class InstallError(Exception):
-    """Raised when a target is unsafe or the install cannot proceed."""
-
-
-def _ignore(_directory: str, names: list[str]) -> set[str]:
-    return {n for n in names if n in SKIP_NAMES or n.startswith(".env") or n.endswith(".pyc")}
-
-
-def is_skill_install(path: Path) -> bool:
-    """Return True when path holds a previous install of this skill."""
-    skill = path / "SKILL.md"
-    if not skill.is_file():
-        return False
-    return f"name: {SKILL_NAME}" in skill.read_text(encoding="utf-8", errors="replace")[:2000]
-
-
-def check_target(target: Path, source: Path, *, force: bool, home: Path) -> Path:
-    """Resolve and validate an install target.
-
-    Raises:
-        InstallError: for the source, its parents or children, the home
-            directory, the filesystem root, a wrong leaf name, or an existing
-            directory that is not a previous install.
-    """
-    target = target.expanduser().resolve()
-    source = source.resolve()
-    if target == source or source.is_relative_to(target):
-        raise InstallError(f"target {target} is the source repository or one of its parents")
-    if target.is_relative_to(source):
-        raise InstallError(f"target {target} is inside the source repository")
-    if target == home.resolve() or target == Path(target.anchor):
-        raise InstallError(f"target {target} is the home directory or the filesystem root")
-    if target.name != SKILL_NAME:
-        raise InstallError(f"target directory name must be {SKILL_NAME!r}, got {target.name!r}")
-    if target.exists():
-        if not target.is_dir():
-            raise InstallError(f"target {target} exists and is not a directory")
-        if any(target.iterdir()):
-            if not force:
-                raise InstallError(f"target {target} exists; rerun with --force to replace it")
-            if not is_skill_install(target):
-                raise InstallError(
-                    f"refusing to replace {target}: it is not a previous install of {SKILL_NAME}"
-                )
-    return target
-
-
-def copy_allowlist(source: Path, dest: Path) -> list[str]:
-    """Copy INCLUDE paths from source into dest and return the relative names."""
-    copied: list[str] = []
-    for rel in INCLUDE:
-        src = source / rel
-        if not src.exists():
-            raise InstallError(f"missing source path: {rel}")
-        out = dest / rel
-        out.parent.mkdir(parents=True, exist_ok=True)
-        if src.is_dir():
-            shutil.copytree(src, out, ignore=_ignore)
-        else:
-            shutil.copy2(src, out)
-        copied.append(rel)
-    return copied
-
-
-def install(source: Path, target: Path, *, force: bool, dry_run: bool, home: Path) -> list[str]:
-    """Install the skill and return the list of copied relative paths."""
-    target = check_target(target, source, force=force, home=home)
-    if dry_run:
-        return list(INCLUDE)
-
-    staging = target.parent / f".{SKILL_NAME}.staging"
-    backup = target.parent / f".{SKILL_NAME}.previous"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    for leftover in (staging, backup):
-        if leftover.exists():
-            shutil.rmtree(leftover)
-
-    try:
-        copied = copy_allowlist(source, staging)
-        if not (staging / "SKILL.md").is_file():
-            raise InstallError("staged copy has no SKILL.md")
-    except BaseException:
-        shutil.rmtree(staging, ignore_errors=True)
-        raise
-
-    if target.exists():
-        target.rename(backup)
-    try:
-        staging.rename(target)
-    except OSError:
-        if backup.exists():
-            backup.rename(target)
-        raise
-    shutil.rmtree(backup, ignore_errors=True)
-    return copied
-
-
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parser.add_argument("--agent", choices=sorted(DEFAULT_TARGETS), default="codex")
-    parser.add_argument("--target", type=Path, help="install directory; its name must be the-polyglot-protocol")
-    parser.add_argument("--force", action="store_true", help="replace a previous install of this skill")
-    parser.add_argument("--dry-run", action="store_true", help="validate the target and list what would be copied")
-    args = parser.parse_args(argv)
-
-    target = args.target if args.target else DEFAULT_TARGETS[args.agent]
-    try:
-        copied = install(ROOT, target, force=args.force, dry_run=args.dry_run, home=Path.home())
-    except InstallError as error:
-        print(f"install refused: {error}", file=sys.stderr)
-        return 2
-    verb = "would install" if args.dry_run else "installed"
-    label = f"for {args.agent}: " if not args.target else ""
-    print(f"{verb} The Polyglot Protocol {label}{target} ({len(copied)} paths)")
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+```python
+def check_replace_target(target: Path) -> None:
+    """Refuse to delete a directory that is not an earlier install of this skill."""
+    resolved = target.resolve()
+    if resolved.name != SKILL_NAME:
+        raise SystemExit(f"refusing to replace {resolved}: its name must be {SKILL_NAME}")
+    if resolved == ROOT or ROOT.is_relative_to(resolved):
+        raise SystemExit(f"refusing to replace {resolved}: it holds the source repository")
+    if not (resolved / "SKILL.md").is_file():
+        raise SystemExit(f"refusing to replace {resolved}: no SKILL.md, so it is not an earlier install")
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `python -B tests/test-install-skill.py 2>&1 | tail -5`
-Expected: `Ran 12 tests` and `OK`. If `test_installed_copy_validates_itself` fails, the allowlist is missing a file the validator needs: add that path to `INCLUDE` and report which one.
+Run: `python -B tests/test-install-skill.py 2>&1 | tail -4`
+Expected: `Ran 5 tests` and `OK`. If `test_installed_copy_validates_itself` fails because an excluded file is read by the validator, remove only that name from the exclusion and report which one.
 
-- [ ] **Step 5: Replace the readme Quick Start and install commands**
+- [ ] **Step 5: Edit the readme**
 
-In `readme.md`, replace this exact block:
-
-```markdown
-Use the skill folder directly from an agent that supports local skill folders,
-or copy the relevant adapter into the target agent's expected guidance location.
-```
-
-with:
+In `readme.md`, replace the Quick Start sentence about copying an adapter with:
 
 ```markdown
 Use the skill folder directly from an agent that supports local skill folders,
-or install it with the commands below. Install the whole skill folder: the
-adapter files link to `SKILL.md` and `profiles/`, so an adapter copied on its
-own cannot find them.
+or install it with the commands below. Install the whole skill folder. Adapter
+files link to `SKILL.md` and `profiles/`, so an adapter copied on its own
+cannot find them.
 ```
 
-Replace the whole `## One-Line Install` section (from `## One-Line Install` up to but not including `Validate the project:`) with:
-
-````markdown
-## One-Line Install
-
-These commands clone into a fresh temporary directory, so they work on every
-run, and install into the agent's global skill directory. They do not replace an
-existing install.
-
-Codex (`~/.agents/skills`):
+Replace each one-line install so it clones into a fresh temporary directory and does not use `--force`. The Codex one becomes:
 
 ```sh
 d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent codex
 ```
 
-Claude Code (`~/.claude/skills`):
+Do the same for `claude-code`, `opencode`, and the custom `--target` form. After the commands add:
 
-```sh
-d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent claude-code
+```markdown
+Add `--force` to replace an existing install. It only replaces a previous
+install of this skill, and the target directory must be named
+`the-polyglot-protocol`. On Windows, create a directory yourself instead of
+using `$(mktemp -d)`.
 ```
-
-OpenCode (`~/.config/opencode/skills`):
-
-```sh
-d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent opencode
-```
-
-Custom location (the directory name must be `the-polyglot-protocol`):
-
-```sh
-d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --target ~/path/to/skills/the-polyglot-protocol
-```
-
-To see what an install would do without writing anything, add `--dry-run`. To
-update an existing install, add `--force`. It replaces only a previous install of
-this skill, and it keeps the old copy if the new one fails to copy. On Windows,
-replace `$(mktemp -d)` with a directory you create and clone into it.
-````
 
 - [ ] **Step 6: Verify**
 
 Run: `python -B scripts/validate-workspace.py 2>&1 | tail -3`
 Expected: `workspace validation: PASS`.
-Run: `python -B scripts/install-skill.py --agent opencode --dry-run`
-Expected: a line starting `would install The Polyglot Protocol for opencode:` containing `.config/opencode/skills/the-polyglot-protocol`, exit 0.
 Run: `python -B scripts/install-skill.py --target /tmp/skills --force; echo exit=$?`
-Expected: `install refused:` on stderr and `exit=2`.
+Expected: a refusal message and a non-zero exit (no directory is touched).
 
 - [ ] **Step 7: Commit**
 
 ```bash
 git add scripts/install-skill.py tests/test-install-skill.py readme.md
-git commit -m "Rewrite installer with allowlist, target guards, and staged replace"
+git commit -m "Fix installer target paths, guard force replace, and skip junk files"
 ```
 
 ---
@@ -539,60 +308,22 @@ git commit -m "Fix broken required paths and nonexistent skill references"
 
 ### Task 3: Remove the hardcoded score claim and correct the changelog entry
 
+Minimal path. Desired effects: the validator no longer prints a score it did not
+compute, no document presents it as a measured score, and the false changelog claims
+are corrected. No new test file: the grep below proves the effect.
+
 **Files:**
 - Modify: `scripts/validate-language-guidance.py`, `readme.md`, `contributing.md`, `docs/languages/score-report.md`, `docs/workflow/validate-scripts-packaged-skill-coverage-changelog-entry.md`
-- Create: `tests/test-validate-language-guidance.py`
 
 **Interfaces:**
 - Consumes: nothing.
 - Produces: a validator that prints `PASS` or `FAIL` with counts and no numeric score.
 
-- [ ] **Step 1: Write the failing test**
-
-Create `tests/test-validate-language-guidance.py`:
-
-```python
-from __future__ import annotations
-
-import subprocess
-import sys
-import unittest
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
-class LanguageValidatorOutputTest(unittest.TestCase):
-    def test_reports_pass_without_a_numeric_score(self) -> None:
-        result = subprocess.run(
-            [sys.executable, "-B", str(ROOT / "scripts" / "validate-language-guidance.py")],
-            cwd=ROOT, text=True, capture_output=True, check=False,
-        )
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("language guidance validation: PASS", result.stdout)
-        self.assertNotIn("100/100", result.stdout)
-        self.assertNotIn("score:", result.stdout)
-
-
-if __name__ == "__main__":
-    unittest.main()
-```
-
-- [ ] **Step 2: Run it to verify it fails**
-
-Run: `python -B tests/test-validate-language-guidance.py 2>&1 | tail -6`
-Expected: FAIL with `AssertionError: '100/100' unexpectedly found`.
-
-- [ ] **Step 3: Remove the score line**
+- [ ] **Step 1: Remove the score line**
 
 In `scripts/validate-language-guidance.py`, delete the line `    print("score: 100/100")` and nothing else.
 
-- [ ] **Step 4: Run it to verify it passes**
-
-Run: `python -B tests/test-validate-language-guidance.py 2>&1 | tail -4`
-Expected: `Ran 1 test` and `OK`.
-
-- [ ] **Step 5: Update the documents**
+- [ ] **Step 2: Update the documents**
 
 `readme.md`: in the "Expected result" text block, delete the line `score: 100/100` (keep the other five lines). Replace `Current validation score: \`100/100\`.` with:
 
@@ -622,7 +353,7 @@ Structural validation: `PASS`. This is a structural check, not a rubric score.
 
 Leave `SKILL.md` and `dev-workflow.md` alone: their `100/100` is the audit target, which is a requirement, not a claim.
 
-- [ ] **Step 6: Correct the changelog entry**
+- [ ] **Step 3: Correct the changelog entry**
 
 Append this section to the end of `docs/workflow/validate-scripts-packaged-skill-coverage-changelog-entry.md`:
 
@@ -630,40 +361,40 @@ Append this section to the end of `docs/workflow/validate-scripts-packaged-skill
 
 ## Correction (2026-10-11)
 
-Verified against the repository on 2026-10-11, several statements above are not
-true. They are kept for history and corrected here.
+Checked against the repository on 2026-10-11, several statements above are not
+true. They stay for history and are corrected here.
 
 - **Docstrings.** The entry says `validate-workspace.py` and
   `validate-language-guidance.py` use strict Google-style docstrings with
-  `Args:`, `Returns:`, `Raises:` and complexity sections. `validate-language-guidance.py`
-  has no docstrings at all, and in `validate-workspace.py` the module docstring
-  sits after the imports, so Python does not treat it as a docstring.
+  `Args:`, `Returns:`, `Raises:` and complexity sections.
+  `validate-language-guidance.py` has no docstrings. In `validate-workspace.py`
+  the module docstring sits after the imports, so Python does not use it.
 - **Packaged copy.** The entry describes a `the-polyglot-protocol/` skill
   package and sync checks against it. That directory has never existed in this
   repository's git history (`git log --all -- 'the-polyglot-protocol/*'` is
   empty), so those checks never run.
-- **Standard.** The entry cites `docs/PYTHON.md`. That file does not exist; the
+- **Standard.** The entry cites `docs/PYTHON.md`. That file does not exist. The
   Python guidance is `docs/languages/python/python.md`.
-- **Verification command.** The entry lists `(cd the-polyglot-protocol && python scripts/validate-workspace.py)`
-  as run. That command cannot have run, because the directory does not exist.
-- **Audit scores.** The `100/100` audit results in the sibling artifacts for
-  this change are not supported by the evidence above and should not be relied
-  on.
+- **Verification command.** The entry lists
+  `(cd the-polyglot-protocol && python scripts/validate-workspace.py)` as run.
+  That cannot have run, because the directory does not exist.
+- **Audit scores.** The `100/100` results in the sibling artifacts for this
+  change are not supported by the evidence above. Do not rely on them.
 ```
 
-- [ ] **Step 7: Verify**
+- [ ] **Step 4: Verify**
 
-Run: `python -B tests/test-validate-language-guidance.py 2>&1 | tail -3`
-Expected: `OK`.
+Run: `python -B scripts/validate-language-guidance.py | grep -c "100/100"`
+Expected: `0`.
 Run: `grep -rn "100/100" readme.md contributing.md docs/languages/score-report.md scripts/validate-language-guidance.py || echo "no score claims"`
 Expected: `no score claims`.
 Run: `python -B scripts/validate-workspace.py 2>&1 | tail -3`
 Expected: `workspace validation: PASS`.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/validate-language-guidance.py tests/test-validate-language-guidance.py readme.md contributing.md docs/languages/score-report.md docs/workflow/validate-scripts-packaged-skill-coverage-changelog-entry.md
+git add scripts/validate-language-guidance.py readme.md contributing.md docs/languages/score-report.md docs/workflow/validate-scripts-packaged-skill-coverage-changelog-entry.md
 git commit -m "Remove hardcoded validator score and correct false changelog claims"
 ```
 
@@ -832,31 +563,6 @@ Expected: `code identical in N files` and no assertion error. The one allowed ex
 Run: `grep -rniE "note that|worth noting|importantly|robust|seamless|leverage|comprehensive|ensure that|simply|gracefully" scripts/*.py tests/*.py || echo "no filler words"`
 Expected: `no filler words`.
 
-Run this sentence-length check:
-
-```python
-import ast, io, re, tokenize
-from pathlib import Path
-
-long_ones = []
-for path in sorted(Path("scripts").glob("*.py")) + sorted(Path("tests").glob("*.py")):
-    source = path.read_text(encoding="utf-8")
-    texts = [tok.string.lstrip("# ") for tok in tokenize.generate_tokens(io.StringIO(source).readline) if tok.type == tokenize.COMMENT]
-    for node in ast.walk(ast.parse(source)):
-        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            doc = ast.get_docstring(node)
-            if doc:
-                texts.append(doc)
-    for text in texts:
-        for sentence in re.split(r"(?<=[.!?])\s+", text):
-            if len(sentence.split()) > 25:
-                long_ones.append((path.name, sentence[:80]))
-print(len(long_ones), "long sentences")
-for item in long_ones:
-    print(item)
-```
-
-Expected: `0 long sentences`. Shorten any that are listed.
 
 - [ ] **Step 5: Verify**
 
@@ -883,6 +589,28 @@ protocol-level file that states how code is written, checked, and scored.
 **Interfaces:**
 - Consumes: nothing.
 - Produces: the rule stated once as the canonical text in `docs/language-guidelines.md`, and short pointers elsewhere. No code.
+
+The basic rule of the protocol goes in first: take the minimal path, with the minimal
+change, that produces the desired effect.
+
+- [ ] **Step 0: The basic rule**
+
+In `SKILL.md`, under `## Core Rules`, add this as the FIRST bullet:
+
+```markdown
+- Basic rule: take the minimal path, with the minimal change, that produces the
+  desired effect. Name the effect first. Do not add features, options,
+  abstractions, or checks the request does not need.
+```
+
+In `docs/language-guidelines.md`, under `## Universal Rules`, add the same bullet as the first bullet. In `docs/languages/pre-codegen-checklist.md`, add this after step `10.`, before the comment-rule step:
+
+```markdown
+11. State the desired effect and the smallest change that produces it before
+    writing code.
+```
+
+and number the comment-rule step `12.` instead of `11.`.
 
 Do not edit any `docs/languages/<language>.md` file here. Adding one line to each language file's `## Source Documentation And Comments` section is Wave 2 work.
 
@@ -967,145 +695,12 @@ git commit -m "Make the plain-language comment rule part of the protocol"
 
 ---
 
-### Task 7: Enforce the comment rule in the validator
+### Task 7 (not planned): Enforce the comment rule in the validator
 
-Run this after Task 5, so the repository's scripts and tests already comply when the check turns on.
-
-**Files:**
-- Modify: `scripts/validate-workspace.py`
-- Modify: `tests/test-validate-workspace.py`
-
-**Interfaces:**
-- Consumes: the comment pass from Task 5.
-- Produces: `comment_texts(source: str) -> list[tuple[int, str]]`, `comment_style_problems(source: str) -> list[str]`, `check_comment_style() -> list[str]`, and constants `COMMENT_BANNED`, `MAX_COMMENT_SENTENCE_WORDS`.
-
-- [ ] **Step 1: Write the failing tests**
-
-Add this class to `tests/test-validate-workspace.py`, before the `if __name__` block:
-
-```python
-class CommentStyleTest(unittest.TestCase):
-    def test_flags_filler_phrases_in_comments(self) -> None:
-        problems = VW.comment_style_problems("# Note that this is robust.\nx = 1\n")
-        self.assertTrue(any("note that" in p for p in problems))
-        self.assertTrue(any("robust" in p for p in problems))
-
-    def test_flags_filler_in_docstrings(self) -> None:
-        source = 'def f():\n    """Simply ensure that the value is set."""\n    return 1\n'
-        problems = VW.comment_style_problems(source)
-        self.assertTrue(any("simply" in p for p in problems))
-        self.assertTrue(any("ensure that" in p for p in problems))
-
-    def test_flags_module_docstring(self) -> None:
-        problems = VW.comment_style_problems('"""A comprehensive helper."""\nx = 1\n')
-        self.assertTrue(any("comprehensive" in p for p in problems))
-
-    def test_flags_long_sentences(self) -> None:
-        long_sentence = " ".join(["word"] * 30) + "."
-        problems = VW.comment_style_problems(f"# {long_sentence}\nx = 1\n")
-        self.assertTrue(any("words" in p for p in problems))
-
-    def test_plain_comments_pass(self) -> None:
-        source = '"""Check file names."""\n# Skip hidden folders because caches live there.\nx = 1\n'
-        self.assertEqual(VW.comment_style_problems(source), [])
-
-    def test_words_that_only_contain_a_banned_word_pass(self) -> None:
-        self.assertEqual(VW.comment_style_problems("# This check gains robustness.\n"), [])
-
-    def test_banned_words_in_string_literals_are_not_comments(self) -> None:
-        self.assertEqual(VW.comment_style_problems('BANNED = ("robust", "seamless")\n'), [])
-
-    def test_repository_scripts_and_tests_follow_the_rule(self) -> None:
-        self.assertEqual(VW.check_comment_style(), [])
-```
-
-- [ ] **Step 2: Run them to verify they fail**
-
-Run: `python -B tests/test-validate-workspace.py 2>&1 | tail -6`
-Expected: FAIL with `AttributeError: module 'validate_workspace' has no attribute 'comment_style_problems'`.
-
-- [ ] **Step 3: Write the implementation**
-
-In `scripts/validate-workspace.py` add `import ast`, `import io` and `import tokenize` to the import block. Add these constants next to the other module constants:
-
-```python
-COMMENT_BANNED = (
-    "note that",
-    "worth noting",
-    "it's worth",
-    "importantly",
-    "robust",
-    "seamless",
-    "seamlessly",
-    "leverage",
-    "comprehensive",
-    "ensure that",
-    "simply",
-    "gracefully",
-    "cutting-edge",
-)
-MAX_COMMENT_SENTENCE_WORDS = 25
-```
-
-Add these functions before `check_files`:
-
-```python
-def comment_texts(source: str) -> list[tuple[int, str]]:
-    """Return (line, text) for each comment and docstring in Python source."""
-    found: list[tuple[int, str]] = []
-    for token in tokenize.generate_tokens(io.StringIO(source).readline):
-        if token.type == tokenize.COMMENT:
-            found.append((token.start[0], token.string.lstrip("# ").strip()))
-    for node in ast.walk(ast.parse(source)):
-        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            doc = ast.get_docstring(node, clean=False)
-            if doc and node.body:
-                found.append((node.body[0].lineno, doc))
-    return found
-
-
-def comment_style_problems(source: str) -> list[str]:
-    """List filler phrases and over-long sentences in comments and docstrings."""
-    problems: list[str] = []
-    for line, text in comment_texts(source):
-        lowered = text.lower()
-        for phrase in COMMENT_BANNED:
-            if re.search(rf"\b{re.escape(phrase)}\b", lowered):
-                problems.append(f"line {line}: filler phrase {phrase!r}")
-        for sentence in re.split(r"(?<=[.!?])\s+", text):
-            if len(sentence.split()) > MAX_COMMENT_SENTENCE_WORDS:
-                problems.append(f"line {line}: sentence over {MAX_COMMENT_SENTENCE_WORDS} words")
-    return problems
-
-
-def check_comment_style() -> list[str]:
-    """Apply the plain-language comment rule to scripts/ and tests/."""
-    errors: list[str] = []
-    for directory in ("scripts", "tests"):
-        for path in sorted((ROOT / directory).glob("*.py")):
-            for problem in comment_style_problems(path.read_text(encoding="utf-8")):
-                errors.append(f"{path.relative_to(ROOT)}: {problem}")
-    return errors
-```
-
-In `main`, add `errors.extend(check_comment_style())` after `errors.extend(check_core_docs_model_neutral())`.
-
-- [ ] **Step 4: Run the tests**
-
-Run: `python -B tests/test-validate-workspace.py 2>&1 | tail -6`
-Expected: `OK`. If `test_repository_scripts_and_tests_follow_the_rule` fails, list the reported problems and rewrite those comments in plain language; do not weaken the check or the word list.
-
-- [ ] **Step 5: Verify**
-
-Run: `python -B scripts/validate-workspace.py 2>&1 | tail -3`
-Expected: `workspace validation: PASS`.
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add scripts/validate-workspace.py tests/test-validate-workspace.py
-git commit -m "Check the plain-language comment rule in the validator"
-```
+Not built by default. The protocol states the rule (Task 6) and the scoring rubric
+covers it, which is the minimal path to the desired effect. A validator check that
+fails on filler phrases and long sentences in `scripts/` and `tests/` is optional
+hardening. Build it only if the maintainer asks.
 
 ---
 
