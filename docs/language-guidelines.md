@@ -77,8 +77,7 @@ Use `docs/languages/` for language-specific instructions:
 - Write code comments and docstrings in plain US English at about a 6th grade
   reading level. Technical terms are fine. Say why the code does something, not
   what the next line obviously does. Leave out filler, hype, edit narration,
-  banners, and emoji. `scripts/validate-workspace.py` checks this for the
-  repository's own scripts and tests.
+  banners, and emoji.
 
 ## Current Stable Baselines
 
