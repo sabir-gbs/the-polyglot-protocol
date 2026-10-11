@@ -150,6 +150,8 @@ Copied verbatim from the ledger.
 - `score: 100/100` in the workspace validator output is hardcoded and pre-existing (upgrade plan P0-10). It is not evidence of an audit score.
 - The installer OpenCode default path defect (upgrade plan P0-1) is untouched: `scripts/install-skill.py` and the root readme still install to `~/.opencode/skills` while the OpenCode adapter readme documents `~/.config/opencode/skills`.
 - The deferred findings above are open. Three of them (one for Task 3, two for Task 4) are flagged as worth fixing before merge.
+- The dual-auditor gate required by `SKILL.md` step 9 was not run on this branch's own artifact groups. This is N/A: no auditor dispatch was performed for Plan A. Per-task subagent review and the final whole-branch review stood in for it.
+- The final whole-branch review found one Critical issue (the scorer ignored indented, bulleted, quoted, or bold `FINDING`, `VERDICT`, and `TOTAL` lines, so a decorated `CRITICAL` finding passed the gate), several Important issues (a lock file with a non-string `independence` crashed the scorer; the profile validator accepted wrong-typed containers, crashed on a list-valued harness, and allowed one model for both auditors; the OpenCode profile used an undefined `{agent}` placeholder and `--format json`; the Claude Code command left `Bash` and `NotebookEdit` able to write), and document inconsistencies with the scorer and degraded mode. A fix wave addressed them in three commits: A (scorer), B (profile validator and profiles), and C (workflow documents). That wave closes the deferred Task 1 and Task 2 findings about decorated lines, unhashable `independence`, and unvalidated profile structure, and the three findings flagged worth fixing before merge.
 
 ## Final-pass checklist
 

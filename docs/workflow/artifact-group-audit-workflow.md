@@ -88,6 +88,10 @@ Run these steps for each artifact group.
    malformed contract lines and mismatched criterion names, and exits `0` when
    the gate passes, `1` when it fails, and `2` when an input is invalid. Record
    its output in the audit log.
+
+   With neither `--lock` nor `--independence` the scorer assumes `full` and uses
+   `85`, so in degraded mode always pass `--independence degraded` or `--lock`.
+   The lock file wins, and a conflicting `--independence` exits `2`.
 5. **Gate.** In `full` independence the group passes when the mean is `85` or
    more. In `degraded` independence the mean must be `90` or more. In both modes
    neither auditor may raise a `CRITICAL` finding.
@@ -122,9 +126,12 @@ FINDING <CRITICAL|MAJOR|MINOR> <file>:<line> <one-line summary>
 - `MAJOR` and `MINOR` do not block the gate but must still be fixed in the fix
   step.
 - An auditor output is invalid if it has anything other than ten `VERDICT`
-  lines or a score outside `0` to `10`. Re-dispatch that auditor once without
-  counting a gate round and record the invalid output. If the second output is
-  also invalid, record a blocker and stop the gate for that group.
+  lines, a score outside `0` to `10`, a contract line that is malformed,
+  indented or decorated (bulleted, quoted or bold) instead of starting at
+  column 0, or criterion names that differ from the other auditor's. The scorer
+  exits `2` for each. Re-dispatch that auditor once without counting a gate
+  round and record the invalid output. If the second output is also invalid,
+  record a blocker and stop the gate for that group.
 
 ## Criteria By Artifact Type
 
@@ -149,11 +156,16 @@ Record each round in `docs/workflow/<request-slug>-audits.md`:
 - every finding with severity, copied verbatim
 - fixes applied between rounds
 - any unavailable model, skipped step, or `N/A` with evidence
+- the independence mode (`full` or `degraded`) and the lock file or profile that
+  produced the role mapping
 
 ## N/A And Blocker Rules
 
 - Never fabricate an auditor result, score, or severity tag.
 - If an auditor model is unavailable, record `status`, `reason`, `evidence`, and
-  `follow-up requirement if scope changes`, then stop the gate for that group.
+  `follow-up requirement if scope changes`. If a second model from another
+  family is available the gate continues; if only one family is available it
+  continues in degraded independence. Only the absence of two different
+  qualified models stops the gate for that group.
 - If a group fails after round 3, the blocker is the failed gate itself.
   Report it. Do not lower the threshold to pass.

@@ -20,8 +20,9 @@ selected profile's `fallback` block.
 
 A profile is Markdown with one ` ```json ` block. Required keys: `name`,
 `harnesses`, `constraints`, `pins`, `fallback`, `verified_on`, `sources`.
-`scripts/validate-workspace.py` checks them and warns when `verified_on` is
-older than 30 days.
+`scripts/validate-workspace.py` validates the shipped files in `profiles/` and
+warns when `verified_on` is older than 30 days. A project profile at
+`.polyglot/profile.md` is not validated yet.
 
 ## Harness Classes
 
@@ -57,7 +58,8 @@ configuration`: it can fill one role, not several with different models.
 
 A harness is `multi-family` when it exposes models from more than one family and
 `single-family` otherwise. A multi-family harness can satisfy the independence
-rule alone.
+rule alone. A single-family harness needs a second harness, or the gate runs in
+degraded independence.
 
 ## Read-Only Is Verified
 
@@ -72,6 +74,11 @@ Add one command template to the profile's `harnesses` block with `{model}` and
 `{prompt_file}` placeholders. It must run headless and print the final answer to
 stdout. Everything else is probed.
 
+Placeholders in command templates: `{model}` and `{prompt_file}` are required;
+`{output_file}` is a path the harness should write its final answer to when its
+CLI supports that; `{agent}` is the harness agent configured for the role, taken
+from the harness entry's `agents` map.
+
 ## Observed Harnesses
 
 Observed on 2026-10-11 from each tool's own `--help` or official documentation.
@@ -81,7 +88,7 @@ Re-probe before relying on a row.
 |---|---|---|---|---|
 | Codex | `exec` | `-m` | `--sandbox read-only` (OS level) | |
 | Claude Code | `-p` | `--model` | `--allowedTools`, `--disallowedTools` | |
-| OpenCode | `run` | `-m provider/model` | per-agent `permission` config | Scripted auditors need `mode: "all"`; subagent depth defaults to 1 |
+| OpenCode | `run` | `-m provider/model` | per-agent `permission` config | Scripted auditors need `mode: "all"`: with `mode: "subagent"`, `opencode run --agent` silently falls back to the default agent and loses its read-only permissions. Subagent depth defaults to 1 |
 | Grok | `-p/--single`, `--prompt-file` | `-m` | `--allowedTools`, `--disallowed-tools` | Single family |
 | Gemini CLI | `-p` | `-m` | `--approval-mode`, `--sandbox` | |
 | Cursor Agent | `-p` | `--model` | `--mode plan` (planning, no edits) | |

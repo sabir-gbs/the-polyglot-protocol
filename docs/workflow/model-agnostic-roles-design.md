@@ -1,7 +1,8 @@
 # Model-Agnostic Roles Design
 
-Status: **design approved by the maintainer section by section; awaiting review
-of this written spec. No implementation has started.**
+Status: **approved. Plan A (foundation) is implemented on branch
+`feat/model-agnostic-roles`. Plan B (resolver, dispatcher, qualification
+fixture) is not implemented.**
 
 ## Purpose
 
