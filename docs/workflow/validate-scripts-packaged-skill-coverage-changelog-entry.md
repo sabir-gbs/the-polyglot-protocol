@@ -92,6 +92,8 @@ true. They stay for history and are corrected here.
   Python guidance is `docs/languages/python/python.md`.
 - **Verification command.** The entry lists
   `(cd the-polyglot-protocol && python scripts/validate-workspace.py)` as run.
-  That cannot have run, because the directory does not exist.
-- **Audit scores.** The `100/100` results in the sibling artifacts for this
-  change are not supported by the evidence above. Do not rely on them.
+  That could not have run from this repository, because the directory does not exist.
+- **Workflow artifacts.** The entry says the plan, implementation plan, execution
+  plan and audit files were created and reached `100/100`. None of those files
+  exist in this repository or in its git history, so no audit score for this
+  change exists.
