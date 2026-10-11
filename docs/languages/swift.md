@@ -15,7 +15,8 @@ already use Swift.
 
 ```sh
 swift --version
-swift format
+swift format lint --recursive Sources Tests
+swift format --in-place --recursive Sources Tests
 swift test
 xcodebuild test
 ```

@@ -64,7 +64,9 @@ practical.
 
 Before generating Zig, inspect `build.zig`, target matrix, module layout,
 allocator conventions, error sets, tests, and C interop. Preserve allocation
-ownership, target-specific branches, and build options.
+ownership, target-specific branches, and build options. Do not generate
+`@cImport`; it is deprecated in 0.16 and removed in 0.17. Use the build
+system's translate-C step for the pinned Zig version.
 
 ## Design Patterns And Architecture
 

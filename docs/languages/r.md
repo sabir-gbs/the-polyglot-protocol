@@ -17,7 +17,7 @@ R --version
 Rscript -e 'renv::restore()'
 Rscript -e 'styler::style_dir()'
 Rscript -e 'lintr::lint_dir()'
-Rscript -e 'testthat::test_dir("tests")'
+Rscript -e 'testthat::test_local()'
 ```
 
 ## Generation Rules
