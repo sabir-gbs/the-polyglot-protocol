@@ -23,15 +23,32 @@ from pathlib import Path
 
 CRITERIA_COUNT = 10
 THRESHOLDS = {"full": 85, "degraded": 90}
-# A contract line is any line whose first word, after any run of decoration
-# (whitespace, punctuation, symbols, emoji, underscores, "1." or "1)" list
-# markers), is an ALL-CAPS reserved word. The strict shapes below only match at
-# column 0, so a decorated or indented contract line is rejected instead of
-# silently ignored. Mixed-case prose ("Finding", "Total") is not reserved.
-RESERVED_RE = re.compile(r"^(?:[\W_]|\d+[.)])*(VERDICT|TOTAL|FINDING)\b")
+# A line is a reserved contract line if ANY of these patterns matches, however
+# it is decorated or prefixed. The strict shapes below only match at column 0,
+# so a reserved line that is not a clean column-0 contract line is rejected
+# (exit 2) instead of silently ignored. Listing prefixes can never be complete,
+# so the patterns key on the contract tokens themselves:
+#   1. an ALL-CAPS keyword after any run of non-word characters, underscores,
+#      or numeric list markers ("1.", "1)");
+#   2. a FINDING (any case) followed by an ALL-CAPS severity word, anywhere;
+#   3. a verdict-shaped fragment ("VERDICT ...: 9/10"), anywhere;
+#   4. a total-shaped fragment ("TOTAL: 90/100"), anywhere.
+# Mixed-case severity words ("Finding Critical") are intentionally prose,
+# because the contract is ALL CAPS; so is lower-case running text.
+RESERVED_PATTERNS = (
+    re.compile(r"^(?:[\W_]|\d+[.)])*(?:VERDICT|TOTAL|FINDING)\b"),
+    re.compile(r"\b(?i:finding)[ \t]+[\W_]*(?:CRITICAL|MAJOR|MINOR)\b"),
+    re.compile(r"\bVERDICT\b[^\n]*:\s*\d+/10\b"),
+    re.compile(r"\bTOTAL\b\s*:\s*\d+/100\b"),
+)
 VERDICT_RE = re.compile(r"^VERDICT (?P<name>.+?): (?P<score>\d+)/10\s*$")
 TOTAL_RE = re.compile(r"^TOTAL: (?P<total>\d+)/100\s*$")
 FINDING_RE = re.compile(r"^FINDING (?P<severity>CRITICAL|MAJOR|MINOR) (?P<where>\S+) (?P<text>.+?)\s*$")
+
+
+def is_reserved(line: str) -> bool:
+    """Return True if the line looks like a contract line in any decoration."""
+    return any(pattern.search(line) for pattern in RESERVED_PATTERNS)
 
 
 class InvalidInputError(ValueError):
@@ -63,9 +80,9 @@ class AuditResult:
 def parse_audit(path: Path) -> AuditResult:
     """Parse one auditor output file.
 
-    Any line whose first word is a reserved prefix, even one that is indented
-    or decorated (bulleted, quoted, bold, numbered), must match the contract
-    exactly at column 0.
+    Any line that looks like a contract line (see RESERVED_PATTERNS), even one
+    that is indented, decorated, or prefixed, must match the contract exactly
+    at column 0.
 
     Complexity: O(n) in the number of lines.
 
@@ -83,7 +100,7 @@ def parse_audit(path: Path) -> AuditResult:
         raise InvalidInputError(f"cannot decode {path} as UTF-8: {error.reason}") from error
 
     for number, line in enumerate(text.splitlines(), 1):
-        if not RESERVED_RE.match(line):
+        if not is_reserved(line):
             continue
         if match := VERDICT_RE.match(line):
             name, score = match["name"], int(match["score"])

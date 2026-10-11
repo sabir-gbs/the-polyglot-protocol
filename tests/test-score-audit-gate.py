@@ -251,6 +251,42 @@ class ScoreAuditGateTest(unittest.TestCase):
                 text = audit_text([10] * 10) + line + "\n"
                 self.assertEqual(self.run_gate(text, audit_text([10] * 10))[0], INVALID_CODE)
 
+    def test_contract_lines_with_letter_or_digit_decoration_are_invalid(self) -> None:
+        decorated = [
+            "| 1 | FINDING CRITICAL | a.md:3 | x |",
+            "1.1 FINDING CRITICAL a.md:3 x",
+            "#1 FINDING CRITICAL a.md:3 x",
+            "1: FINDING CRITICAL a.md:3 x",
+            "a) FINDING CRITICAL a.md:3 x",
+            "(a) FINDING CRITICAL a.md:3 x",
+            "iv. FINDING CRITICAL a.md:3 x",
+            "1\ufe0f\u20e3 FINDING CRITICAL a.md:3 x",
+            "\u2460 FINDING CRITICAL a.md:3 x",
+            "Auditor A: FINDING CRITICAL a.md:3 x",
+            "**Result:** FINDING CRITICAL a.md:3 x",
+            "Step 2 - FINDING CRITICAL a.md:3 x",
+            "Finding CRITICAL a.md:3 x",
+            "Auditor A: VERDICT clarity: 9/10",
+            "Result - TOTAL: 90/100",
+        ]
+        for line in decorated:
+            with self.subTest(line=line):
+                text = audit_text([10] * 10) + line + "\n"
+                self.assertEqual(self.run_gate(text, audit_text([10] * 10))[0], INVALID_CODE)
+
+    def test_prose_with_reserved_words_in_running_text_is_ignored(self) -> None:
+        prose = [
+            "finding critical issues took a while",
+            "- Finding the root cause",
+            "1. Total cost was low.",
+            "NOTE that the TOTAL is re-added",
+            "Each VERDICT line is parsed",
+            "This FINDING was already reported",
+            "Finding Critical is treated as prose because the contract is ALL CAPS.",
+        ]
+        text = audit_text([10] * 10) + "\n".join(prose) + "\n"
+        self.assertEqual(self.run_gate(text, audit_text([10] * 10))[0], PASS_CODE)
+
     def test_ordinary_prose_that_mentions_the_words_is_ignored(self) -> None:
         prose = [
             "VERDICTS above were checked twice.",
