@@ -80,7 +80,7 @@ class ValidateProfileTest(unittest.TestCase):
         errors, _ = VW.validate_profile([], TODAY)
         self.assertTrue(errors)
 
-    # --- structure: wrong types are errors, never exceptions --------------
+    # Wrong types are errors, never exceptions.
     def assert_error_mentioning(self, data: object, fragment: str) -> None:
         errors, _ = VW.validate_profile(data, TODAY)
         self.assertTrue(any(fragment in e for e in errors), (fragment, errors))

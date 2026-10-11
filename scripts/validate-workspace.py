@@ -59,10 +59,7 @@ def run_language_validator() -> list[str]:
 
 
 def run_packaged_language_validator() -> list[str]:
-    """Additionally validate the language guidance inside the packaged skill.
-
-    This ensures the the-polyglot-protocol/ copy receives the full contract checks.
-    """
+    """Run the language validator on the the-polyglot-protocol/ copy, if it exists."""
     packaged_script = ROOT / "the-polyglot-protocol" / "scripts" / "validate-language-guidance.py"
     if not packaged_script.exists():
         return []
@@ -84,7 +81,7 @@ def run_packaged_language_validator() -> list[str]:
 
 
 def check_skill_package_sync() -> list[str]:
-    """Guard against drift between root scripts and packaged skill copies."""
+    """Report packaged script copies that differ from the root scripts."""
     errors: list[str] = []
     root_scripts = ROOT / "scripts"
     pkg_scripts = ROOT / "the-polyglot-protocol" / "scripts"
@@ -118,8 +115,7 @@ def run_script_tests() -> list[str]:
 
 
 def check_audit_workflow_references() -> list[str]:
-    """Require the artifact-group audit workflow doc, its references, and a
-    consistent gate threshold in every file that states it.
+    """Check that the audit workflow doc exists, is linked, and states the gate threshold.
 
     Complexity: O(f) in the number of checked files.
     """

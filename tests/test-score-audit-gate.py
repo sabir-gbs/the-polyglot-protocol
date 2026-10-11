@@ -52,7 +52,6 @@ class ScoreAuditGateTest(unittest.TestCase):
             lock_path.write_text(json.dumps(lock), encoding="utf-8")
             return self.run_gate(first, second, "--lock", str(lock_path), *extra)
 
-    # --- existing behavior -------------------------------------------------
     def test_passes_above_threshold(self) -> None:
         text = audit_text([9] * 10)
         self.assertEqual(self.run_gate(text, text)[0], PASS_CODE)
@@ -90,7 +89,7 @@ class ScoreAuditGateTest(unittest.TestCase):
             code = GATE.main(["/nonexistent/a.txt", "/nonexistent/b.txt"])
         self.assertEqual(code, INVALID_CODE)
 
-    # --- malformed contract lines are rejected, not ignored ---------------
+    # Malformed contract lines are rejected, not skipped.
     def test_negative_score_line_is_invalid(self) -> None:
         bad = audit_text([9] * 9) + "VERDICT criterion 10: -1/10\n"
         self.assertEqual(self.run_gate(bad, audit_text([9] * 10))[0], INVALID_CODE)
@@ -132,12 +131,12 @@ class ScoreAuditGateTest(unittest.TestCase):
         notes = audit_text([10] * 10) + "- VERDICTS above were checked twice.\n> TOTALLY fine.\n"
         self.assertEqual(self.run_gate(notes, audit_text([10] * 10))[0], PASS_CODE)
 
-    # --- both auditors must score the same criteria -----------------------
+    # Both auditors must score the same criteria.
     def test_different_criterion_names_are_invalid(self) -> None:
         other = audit_text([9] * 10, names=[f"other {i}" for i in range(1, 11)])
         self.assertEqual(self.run_gate(audit_text([9] * 10), other)[0], INVALID_CODE)
 
-    # --- thresholds and independence --------------------------------------
+    # Threshold and independence rules.
     def test_threshold_zero_is_invalid(self) -> None:
         zero = audit_text([0] * 10)
         self.assertEqual(self.run_gate(zero, zero, "--threshold", "0")[0], INVALID_CODE)
@@ -212,7 +211,7 @@ class ScoreAuditGateTest(unittest.TestCase):
         text = audit_text([10] * 10)
         self.assertEqual(self.run_gate(text, text, "--lock", "/nonexistent/lock.json")[0], INVALID_CODE)
 
-    # --- undecodable input is invalid input (exit 2), not a crash ---------
+    # Undecodable input is invalid input (exit 2), not a crash.
     def test_undecodable_audit_file_is_invalid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             first, second = Path(tmp) / "a.txt", Path(tmp) / "b.txt"

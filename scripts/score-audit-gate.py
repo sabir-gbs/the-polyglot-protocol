@@ -1,14 +1,15 @@
 """Score the artifact-group dual-auditor gate.
 
-Reads two auditor output files that follow the output contract in
-docs/workflow/artifact-group-audit-workflow.md, re-adds each criterion score
-instead of trusting the advertised total, and applies the gate rule: the mean
-total must reach the threshold for the independence mode and no auditor may
-raise a CRITICAL finding.
+Reads two auditor output files. Their format is defined in
+docs/workflow/artifact-group-audit-workflow.md. The criterion scores are added
+up again, because the total the auditor wrote is not trusted.
 
-Independence comes from a lock file (--lock) when given, otherwise from
---independence, otherwise it defaults to full. Thresholds: full 85,
-degraded 90. A threshold below the floor, or above 100, is rejected.
+The gate passes when the mean total reaches the threshold for the independence
+mode and no auditor raised a CRITICAL finding.
+
+The independence mode comes from the lock file (--lock) when given, then from
+--independence, then it defaults to full. Thresholds: full 85, degraded 90.
+A threshold below the floor, or above 100, is rejected.
 
 Exit codes: 0 gate passed, 1 gate failed, 2 invalid input.
 """
