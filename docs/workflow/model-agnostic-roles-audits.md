@@ -145,7 +145,7 @@ Copied verbatim from the ledger.
 
 ## Deviations
 
-- The three-round planning, coding, and guidance-file audit loops required by `docs/workflow/dev-workflow.md` were not run as such for this change. Per-task subagent review and a final whole-branch review stood in for them. No audit score is claimed for this change.
+- The three-round planning, coding, and guidance-file audit loops required by `docs/workflow/dev-workflow.md` were not run as such for this change. Per-task subagent review (spec compliance and quality) stood in for them. A final whole-branch review is planned but had not been run when this log was written. No audit score is claimed for this change.
 - The dynamic resolver, dispatcher, and qualification fixture (Plan B) are not implemented. Roles are documented and the scorer enforces independence mode, but nothing resolves profiles or dispatches auditors automatically, and read-only auditing is documented rather than enforced by a snapshot.
 - `score: 100/100` in the workspace validator output is hardcoded and pre-existing (upgrade plan P0-10). It is not evidence of an audit score.
 - The installer OpenCode default path defect (upgrade plan P0-1) is untouched: `scripts/install-skill.py` and the root readme still install to `~/.opencode/skills` while the OpenCode adapter readme documents `~/.config/opencode/skills`.
