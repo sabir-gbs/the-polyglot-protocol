@@ -1,3 +1,10 @@
+"""Check that the workspace follows the rules of The Polyglot Protocol.
+
+Checks file names, language guidance files, profiles, the audit workflow files,
+and the script tests. Prints "workspace validation: PASS" and exits 0 when all
+checks pass. Prints each problem and exits 1 otherwise.
+"""
+
 from __future__ import annotations
 
 import json
@@ -6,14 +13,6 @@ import subprocess
 import sys
 from datetime import date
 from pathlib import Path
-
-"""
-Workspace validation script for the Polyglot Protocol.
-
-Enforces naming, structure, and (when present) packaged skill language guidance
-contract checks. Follows Google-style docstrings and explicit complexity per
-docs/PYTHON.md.
-"""
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_UPPERCASE = {"AGENTS.md", "CLAUDE.md", "SKILL.md"}
