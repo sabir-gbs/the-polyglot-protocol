@@ -390,14 +390,10 @@ honestly.
 
 ## Git And Release Controls
 
-- Use `GITHUB_PAT` strictly for all Git operations.
-- Use the token through environment-backed commands only.
-- Do not use interactive Git authentication.
-- Do not use cached credentials.
-- Do not use alternate tokens.
-- Keep credential helpers disabled for the operation if needed to enforce the
-  `GITHUB_PAT` path.
-- Do not write the PAT into remotes, repository config, shell history, or
+- Use `gh auth` for all Git and GitHub operations. Check the login with
+  `gh auth status`.
+- Do not use `GITHUB_PAT` or other personal access tokens.
+- Do not write a token into remotes, repository config, shell history, or
   workflow documents.
 - If Git actions are required but the directory is not a repository, record that
   blocker explicitly in the final pass.
