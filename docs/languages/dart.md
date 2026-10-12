@@ -13,7 +13,7 @@ Flutter only when the project is already Flutter or the user asks for it.
 
 ```sh
 dart --version
-dart pub get
+dart pub get  # Flutter packages: run "flutter pub get" instead
 dart format .
 dart analyze
 dart test

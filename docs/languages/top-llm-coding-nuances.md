@@ -26,6 +26,10 @@ model.
   and operational notes when the code change requires them.
 - **False confidence**: record assumptions, evidence, and unsupported `N/A`
   decisions instead of pretending unsupported checks passed.
+- **Slop comments**: comments that restate the code, narrate edits, hype the
+  result, or pad with filler such as "note that", "robust", "seamless", or
+  "ensure that". Write short, plain US English at about a 6th grade level, keep
+  technical terms, and explain why, not what.
 
 ## Required Behavior
 

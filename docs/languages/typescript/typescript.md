@@ -16,7 +16,7 @@ automation.
 
 - **Language target**: Write TypeScript, not plain JavaScript, for new code unless
   the user explicitly requests JavaScript or the project is already JavaScript-only.
-- **Node.js target**: Target Node.js Active LTS `24.16.0` or the current active
+- **Node.js target**: Target Node.js Active LTS `24.21.0` or the current active
   LTS patch for server-side, CLI, test, build, and tooling code. Do not target
   unsupported Node versions.
 - **Current vs LTS**: Do not target a newly released Current Node major for
@@ -41,7 +41,7 @@ automation.
 - **Version pinning**: New projects should include an `engines.node` range in
   `package.json` and, when using pnpm or Yarn, a `packageManager` field. Keep
   local, CI, and production Node versions aligned.
-- **npm baseline**: Use npm `11.13.0` with Node.js `24.16.0` unless the project
+- **npm baseline**: Use npm `11.19.0` with Node.js `24.21.0` unless the project
   lockfile or deployment platform requires another package manager.
 - **Corepack**: If the project uses pnpm or Yarn through Corepack, use the
   repository's configured `packageManager` value. Do not silently upgrade the
@@ -115,18 +115,23 @@ folder structure unless the user approves a migration.
   dependency requires a short rationale. Prefer platform APIs and existing
   dependencies.
 - **Dev dependency baseline**: For new general TypeScript projects, include:
-  `typescript`, `tsx`, `eslint`, `typescript-eslint`, `prettier`, `vitest`, and
-  `@types/node` when Node APIs are used. Pin exact versions through the lockfile.
+  `typescript`, `tsx`, `eslint`, `@eslint/js`, `typescript-eslint`, `prettier`,
+  `vitest`, and `@types/node` when Node APIs are used. Pin exact versions through
+  the lockfile.
 - **Baseline versions**: For new npm projects, start with `typescript@6.0.3`,
-  `tsx@4.22.3`, `eslint@10.4.0`, `typescript-eslint@8.59.4`,
-  `prettier@3.8.3`, `vitest@4.1.7`, and `@types/node@24.12.4` when targeting
-  Node.js `24.x`. Re-check the registry before starting a new project.
+  `tsx@4.22.3`, `eslint@10.4.0`, `@eslint/js@10.0.1`,
+  `typescript-eslint@8.59.4`, `prettier@3.8.3`, `vitest@4.1.7`, and
+  `@types/node@24.12.4` when targeting Node.js `24.x`. ESLint 10 no longer
+  installs `@eslint/js`, so list it. Re-check the registry before starting a new
+  project.
 - **Node type versions**: Match `@types/node` to the target Node major. Do not use
   the global latest `@types/node` package when it describes a newer Current Node
   major than production.
 - **Version refresh gate**: Before scaffolding a new project, verify the current
   package versions and current Active LTS Node major. If they differ from this
-  dated baseline, use the newer verified baseline and update this document.
+  dated baseline, use the newer verified baseline and update this document. Stay
+  on `typescript` `6.0.x` until the `typescript-eslint` peer range allows a newer
+  version; check that range before bumping.
 - **Environment variables**: Read from `process.env` only at boundary modules,
   validate once, and pass typed config inward. Never scatter raw env access
   through business logic.
@@ -180,6 +185,9 @@ this baseline and relax only with a documented reason:
     "lib": ["ES2024"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "rootDir": ".",
+    "outDir": "dist",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -205,12 +213,20 @@ this baseline and relax only with a documented reason:
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": false
-  }
+  },
+  "include": ["src", "tests"]
 }
 ```
 
+- **`types`**: TypeScript 6 no longer loads `@types/*` packages on its own. Node
+  globals and `node:*` imports need `"types": ["node"]`.
+- **Build output**: `rootDir`, `outDir`, and `include` send build output to
+  `dist/`, so `tsc -p` does not write `.js` and `.d.ts` files beside sources.
+  With `rootDir: "."`, compiled files land under `dist/src`, so point `main` or
+  `exports` there.
 - **Applications** may set `declaration: false` when they do not publish a public
-  package API.
+  package API. Turn `declarationMap` off with it, because the compiler rejects
+  `declarationMap` without `declaration`.
 - **Source maps**: Generate source maps for debugging when needed, but do not
   publish private production source maps publicly. Upload them only to controlled
   error-reporting systems when access is restricted.
@@ -220,7 +236,9 @@ this baseline and relax only with a documented reason:
 - **Browser apps** must include the correct browser libs, usually
   `["ES2024", "DOM", "DOM.Iterable"]`.
 - **Bundler projects** may use `"moduleResolution": "Bundler"` when the framework
-  expects it. Do not mix NodeNext assumptions into bundler-only code.
+  expects it. Do not mix NodeNext assumptions into bundler-only code. Change
+  `module` and `moduleResolution` together: `Bundler` must pair with `module`
+  set to `ESNext` or `Preserve`, not `NodeNext`.
 - **`skipLibCheck`**: Keep `false` for packages and libraries. For large apps with
   dependency type conflicts, `true` is acceptable only as a temporary workaround
   with an issue or note.
@@ -255,7 +273,7 @@ explicit warning budget.
 
 Use this only for new projects without a stronger local config. It follows
 typescript-eslint's current flat-config pattern with typed linting and
-`projectService: true`.
+`projectService: true`. It ignores `dist`, which holds generated build output.
 
 ```js
 import js from "@eslint/js";
@@ -263,6 +281,7 @@ import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
+  { ignores: ["dist"] },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
@@ -759,7 +778,8 @@ programming boring unless a public API genuinely benefits from it.
   caching. Keep build-info files out of source control unless the project has a
   specific reason to track them.
 - Keep `declaration` emit limited to packages that publish types. App-only code
-  should not pay declaration emit cost unless another tool requires it.
+  should not pay declaration emit cost unless another tool requires it. Turn
+  `declarationMap` off with it, because it needs `declaration`.
 - Run `tsc --extendedDiagnostics` or project build profiling before doing
   non-obvious type-system refactors for performance.
 - For deep compiler performance investigations, use TypeScript trace generation
@@ -911,6 +931,7 @@ project-name/
     "audit": "npm audit"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@types/node": "24.12.4",
     "eslint": "10.4.0",
     "prettier": "3.8.3",

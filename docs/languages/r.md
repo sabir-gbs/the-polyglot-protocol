@@ -17,13 +17,17 @@ R --version
 Rscript -e 'renv::restore()'
 Rscript -e 'styler::style_dir()'
 Rscript -e 'lintr::lint_dir()'
-Rscript -e 'testthat::test_dir("tests")'
+Rscript -e 'testthat::test_local()'
 ```
 
 ## Generation Rules
 
 Be explicit about column types, encodings, locale, time zones, and missing
 values. Avoid hidden global state and set seeds for randomized analysis.
+
+- Run R code and data from trusted sources only. Never `eval(parse(text = x))` on external input, because it runs that input as code.
+- Use `readRDS` only on trusted files. A crafted RDS file could run code on R versions before 4.4.0.
+- Do not paste untrusted input into a `system()` command, because Unix passes it to a shell. With `system2()`, wrap each argument in `shQuote()`.
 
 ## Source Documentation And Comments
 

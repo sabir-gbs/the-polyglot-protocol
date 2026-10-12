@@ -16,6 +16,8 @@ rustc --version
 cargo fmt --all
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-targets --all-features
+cargo test --doc
+cargo install cargo-audit --locked
 cargo audit
 ```
 

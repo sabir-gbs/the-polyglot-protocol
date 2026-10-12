@@ -2,10 +2,10 @@
 
 ## Prerequisite Evidence
 
-- Lighthouse: `/home/sabir/.local/bin/lighthouse`, version `13.3.0`.
-- Context7: `/home/sabir/.local/bin/ctx7`, version `0.4.4`.
-- Node.js: `/home/sabir/.local/bin/node`, version `v24.16.0`.
-- `obra/superpowers`: `/home/sabir/.codex/superpowers/package.json`,
+- Lighthouse: `~/.local/bin/lighthouse`, version `13.3.0`.
+- Context7: `~/.local/bin/ctx7`, version `0.4.4`.
+- Node.js: `~/.local/bin/node`, version `v24.16.0`.
+- `obra/superpowers`: `~/.codex/superpowers/package.json`,
   version `5.1.0`.
 - CloakBrowser package: missing from active Python environment:
   `WARNING: Package(s) not found: cloakbrowser`.

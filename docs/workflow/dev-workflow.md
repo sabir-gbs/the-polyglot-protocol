@@ -29,7 +29,7 @@ Current required versions:
 - Lighthouse CLI: `13.3.0`
 - `obra/superpowers`: `5.1.0`
 - Context7 CLI (`ctx7`): `0.4.4`
-- Node.js for workflow CLIs: Active LTS `24.16.0`
+- Node.js for workflow CLIs: Active LTS `24.21.0`
 
 Use fresh local evidence for each check, such as version output, command
 resolution, or a verified local install path. Record the evidence in the
@@ -63,12 +63,13 @@ Apply repository guidance in this order:
 
 1. Direct user request for the current task
 2. `docs/workflow/dev-workflow.md`
-3. `AGENTS.md`
-4. `language-guidelines.md`
-5. `docs/languages/python/python.md`
-6. `docs/languages/typescript/typescript.md`
-7. `CLAUDE.md`
-8. Other repository docs and scripts
+3. `docs/workflow/artifact-group-audit-workflow.md`
+4. `AGENTS.md`
+5. `docs/language-guidelines.md`
+6. `docs/languages/python/python.md`
+7. `docs/languages/typescript/typescript.md`
+8. `adapters/claude-code/CLAUDE.md`
+9. Other repository docs and scripts
 
 If two guidance files overlap, keep all content and resolve the conflict in
 favor of the higher-priority source.
@@ -101,6 +102,7 @@ The audit log must contain:
 - planning audit rounds
 - coding audit rounds
 - guidance-file audit rounds when guidance files changed
+- artifact-group dual-auditor gate rounds, per group
 - verification evidence
 - final-pass notes
 
@@ -108,11 +110,11 @@ The audit log must contain:
 
 - Invoke applicable superpowers skills before acting. Typical defaults are
   `using-superpowers`, `writing-plans`, `verification-before-completion`,
-  `requesting-code-review`, `benchmark`, `qa`, and related workflow skills.
+  `requesting-code-review`, and related workflow skills.
 - Use Context7 to confirm current framework, library, browser, or tooling
   guidance when the request touches external technology.
 - Use repository-local guidance and scripts before inventing new workflow steps.
-- Use `language-guidelines.md` whenever the request involves language choice,
+- Use `docs/language-guidelines.md` whenever the request involves language choice,
   code generation, runtime defaults, toolchain installation, or dependency
   upgrades. Read the relevant file under `docs/languages/` before generating
   language-specific code. Default operational scripts to Python unless the
@@ -227,6 +229,32 @@ The final report must include the criterion-level score table, total score,
 validation commands, and all justified `N/A` items. Do not claim `100/100`
 unless every criterion is scored `10/10` and verification evidence supports it.
 
+## Artifact-Group Dual-Auditor Gate
+
+Split the work into artifact groups and run each group through the dual-auditor
+gate before starting the next group. The full procedure, roles, output contract,
+and criteria sources are in `docs/workflow/artifact-group-audit-workflow.md`.
+
+Summary:
+
+1. Prep: up to 8 workers read, list, and grep the group's files.
+2. Audit: Auditor A and Auditor B, from different model families, score the
+   group independently, in parallel, read-only, across 10 criteria out of `100`.
+3. Check: a worker copies verdict lines and severity tags verbatim.
+4. Score: the orchestrator runs `scripts/score-audit-gate.py`, which re-adds
+   each total and takes the mean.
+5. Gate: pass at a mean of `85` or more with no `CRITICAL` finding. When two
+   model families are not available the gate runs in degraded independence and
+   the bar is `90`. Models come from `profiles/`; see
+   `docs/workflow/role-resolution.md`.
+6. Fix every finding and re-audit as round + 1. If the gate still fails after
+   round 3, stop and report findings and scores to the maintainer.
+
+The gate is additive. It does not replace the Planning, Coding, or Guidance-File
+audit loops or the Post-Codegen Protocol Audit. Passing a group lets work
+continue. It is not a completion claim, and the whole-codebase `10/10` target in
+the Post-Codegen Protocol Audit still applies before completion is reported.
+
 ## Lighthouse Baseline And Regression Control
 
 Before executing new code, establish a Lighthouse baseline for the local Docker
@@ -302,7 +330,7 @@ Score each criterion from `0` to `10` for a total score out of `100`.
 
 ## Guidance-File Audit Loop
 
-When the change touches `docs/workflow/dev-workflow.md`, `AGENTS.md`, `CLAUDE.md`, or another
+When the change touches `docs/workflow/dev-workflow.md`, `AGENTS.md`, `adapters/claude-code/CLAUDE.md`, or another
 guidance file, run three guidance-file audit rounds after the edits.
 
 ### Guidance-File Audit Criteria
@@ -344,7 +372,7 @@ CloakBrowser validation must cover:
 
 Frontend validation rules:
 
-- Use the superpowers QA workflow for frontend validation.
+- Use the `verification-before-completion` skill and the CloakBrowser checks below for frontend validation.
 - Prefer CloakBrowser's Playwright-compatible locators and web-first assertions
   over brittle selectors.
 - Use CloakBrowser as the default browser automation path. Direct Playwright is
@@ -362,14 +390,10 @@ honestly.
 
 ## Git And Release Controls
 
-- Use `GITHUB_PAT` strictly for all Git operations.
-- Use the token through environment-backed commands only.
-- Do not use interactive Git authentication.
-- Do not use cached credentials.
-- Do not use alternate tokens.
-- Keep credential helpers disabled for the operation if needed to enforce the
-  `GITHUB_PAT` path.
-- Do not write the PAT into remotes, repository config, shell history, or
+- Use `gh auth` for all Git and GitHub operations. Check the login with
+  `gh auth status`.
+- Do not use `GITHUB_PAT` or other personal access tokens.
+- Do not write a token into remotes, repository config, shell history, or
   workflow documents.
 - If Git actions are required but the directory is not a repository, record that
   blocker explicitly in the final pass.
@@ -390,6 +414,7 @@ verification are complete, perform one final pass that checks:
 6. local review URLs
 7. deployment approval state
 8. remaining risks or follow-ups
+9. artifact-group gate results, round counts, and any unavailable auditor
 
 Write the final pass into the audit log for the workflow run.
 

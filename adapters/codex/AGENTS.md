@@ -1,9 +1,5 @@
-# Codex Adapter
+# The Polyglot Protocol (Codex)
 
-Use `../../SKILL.md` as the entrypoint for The Polyglot Protocol.
-
-Required command:
-
-```sh
-python ../../scripts/validate-workspace.py
-```
+Read `SKILL.md` in the installed skill folder and follow its Required Workflow
+in order. Validate from the skill root with `python scripts/validate-workspace.py`.
+The default model profile is `profiles/default.md`.

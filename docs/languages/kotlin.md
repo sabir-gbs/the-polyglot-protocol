@@ -23,6 +23,10 @@ Prefer null-safe APIs, immutable data, sealed types for closed states, and
 coroutines with structured concurrency. Avoid platform types leaking across
 boundaries and keep Android UI code separated from domain logic.
 
+- Do not hard-code secrets or API keys in source. An attacker can decompile the app and find them.
+- On Android, set `android:exported="false"` on components other apps do not need, and guard exported components that are not public entry points with a permission.
+- Keep cryptographic keys in the Android Keystore.
+
 ## Source Documentation And Comments
 
 Use KDoc for public classes, functions, properties, sealed hierarchies, and

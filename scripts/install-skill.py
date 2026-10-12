@@ -8,12 +8,24 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_TARGETS = {
-    "codex": Path.home() / ".codex" / "skills" / "the-polyglot-protocol",
+    "codex": Path.home() / ".agents" / "skills" / "the-polyglot-protocol",
     "claude-code": Path.home() / ".claude" / "skills" / "the-polyglot-protocol",
-    "opencode": Path.home() / ".opencode" / "skills" / "the-polyglot-protocol",
+    "opencode": Path.home() / ".config" / "opencode" / "skills" / "the-polyglot-protocol",
 }
 
-EXCLUDES = {".git", ".venv", "__pycache__"}
+EXCLUDES = {
+    ".git",
+    ".venv",
+    "__pycache__",
+    ".superpowers",
+    "tests",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "node_modules",
+}
+# Plan and audit run logs sit in docs/workflow next to the three files the skill uses.
+KEPT_WORKFLOW = {"dev-workflow.md", "artifact-group-audit-workflow.md", "role-resolution.md"}
 
 
 def copy_project(target: Path, *, force: bool) -> None:
@@ -23,10 +35,23 @@ def copy_project(target: Path, *, force: bool) -> None:
                 f"target already exists: {target}\n"
                 "rerun with --force to replace it"
             )
+        # --force deletes the target, so only delete an earlier install of this skill.
+        resolved = target.resolve()
+        if (
+            resolved.name != "the-polyglot-protocol"
+            or ROOT.is_relative_to(resolved)
+            or not (resolved / "SKILL.md").is_file()
+        ):
+            raise SystemExit(
+                f"refusing to replace {target}: it is not an earlier install of this skill"
+            )
         shutil.rmtree(target)
 
-    def ignore(_: str, names: list[str]) -> set[str]:
-        return {name for name in names if name in EXCLUDES}
+    def ignore(directory: str, names: list[str]) -> set[str]:
+        skipped = {name for name in names if name in EXCLUDES or name.startswith(".env")}
+        if Path(directory).name == "workflow":
+            skipped |= {name for name in names if name not in KEPT_WORKFLOW}
+        return skipped
 
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(ROOT, target, ignore=ignore)

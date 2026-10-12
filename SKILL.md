@@ -24,7 +24,12 @@ or more programming languages.
    its score, remediate all gaps until every criterion reaches `10/10`, and
    report the final total score. If a criterion cannot reach `10/10`, document
    the blocker, evidence, and follow-up requirement before completion.
-9. Run validation when this skill folder is available:
+9. Split work into artifact groups and pass each group through the
+   dual-auditor gate in `docs/workflow/artifact-group-audit-workflow.md`
+   before starting the next group.
+10. Run validation from the skill root (the folder that contains this file). It
+    checks the protocol repository itself, not the project you are generating
+    code for:
 
 ```sh
 python scripts/validate-workspace.py
@@ -32,6 +37,9 @@ python scripts/validate-workspace.py
 
 ## Core Rules
 
+- Basic rule: take the minimal path, with the minimal change, that produces the
+  desired effect. Name the effect first. Do not add features, options,
+  or abstractions the request does not need.
 - Default operational scripts to Python unless the repository already has a
   better native script runner.
 - Preserve existing project language, framework, package manager, formatter,
@@ -44,9 +52,16 @@ python scripts/validate-workspace.py
   sources before pinning or upgrading.
 - Do not invent APIs, configuration keys, package names, services, flags, or
   framework behavior.
+- Write code comments and docstrings in plain US English at about a 6th grade
+  reading level. Technical terms are fine. No filler, hype, or edit narration.
+  See `docs/language-guidelines.md`.
 - Generated code is not complete until a whole-codebase protocol audit reaches
   `100/100` across the rubric, or a documented blocker explains why that target
   is impossible in the current scope.
+- An artifact group passes its audit gate at a mean score of `85` or more from
+  two independent auditors with no `CRITICAL` finding (`90` when only one model
+  family is available). The gate lets work continue and is not a completion
+  claim. Model names live only in `profiles/`.
 - Treat unsupported Docker, Lighthouse, browser, deployment, Git, or CI steps as
   explicit `N/A` items with evidence.
 
@@ -58,8 +73,12 @@ python scripts/validate-workspace.py
 - Examples: `docs/languages/examples.md`
 - Version checks: `docs/languages/install-version-commands.md`
 - Scoring: `docs/languages/scoring-rubric.md`
+- Artifact-group audit gate: `docs/workflow/artifact-group-audit-workflow.md`
+- Gate scorer: `scripts/score-audit-gate.py`
+- Role resolution and harness reference: `docs/workflow/role-resolution.md`
+- Model profiles: `profiles/`
 - LLM failure modes: `docs/languages/top-llm-coding-nuances.md`
-- Current score: `docs/languages/score-report.md`
+- Current status: `docs/languages/score-report.md`
 
 ## Adapter Files
 

@@ -135,40 +135,51 @@ If you have to ask for these things manually, you need a protocol.
   completeness, and accuracy decisions for each language
 - `docs/language-guidelines.md`: language selection and default-script policy
 - `docs/workflow/dev-workflow.md`: planning, audit, validation, and `N/A` rules
+- `docs/workflow/artifact-group-audit-workflow.md`: per-group dual-auditor
+  audit gate, roles, output contract, and pass rules
+- `docs/workflow/role-resolution.md`: how audit roles map to models and
+  harnesses
+- `profiles/`: default and open-weight model profiles, and a blank template
 - `scripts/validate-workspace.py`: full local validation
 - `adapters/`: lightweight guidance and human-readable README files for Codex,
   Claude Code, and OpenCode
 
 ## Quick Start
 
-Use the skill folder directly from an agent that supports local skill folders,
-or copy the relevant adapter into the target agent's expected guidance location.
+Use the skill folder directly from an agent that supports local skill folders.
+Install the whole skill folder. Adapter files link to `SKILL.md` and `profiles/`,
+so an adapter copied on its own cannot find them.
 
 ## One-Line Install
 
 Codex:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent codex --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent codex
 ```
 
 Claude Code:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent claude-code --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent claude-code
 ```
 
 OpenCode:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --agent opencode --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --agent opencode
 ```
 
 Custom location:
 
 ```sh
-git clone https://github.com/sabir-gbs/the-polyglot-protocol.git /tmp/the-polyglot-protocol && python /tmp/the-polyglot-protocol/scripts/install-skill.py --target ~/path/to/skills/the-polyglot-protocol --force
+d=$(mktemp -d) && git clone https://github.com/sabir-gbs/the-polyglot-protocol.git "$d" && python "$d/scripts/install-skill.py" --target ~/path/to/skills/the-polyglot-protocol
 ```
+
+Add `--force` to replace an existing install. It only replaces a previous
+install of this skill, and the target directory must be named
+`the-polyglot-protocol`. On Windows, create a directory yourself instead of
+`$(mktemp -d)`.
 
 Validate the project:
 
@@ -183,7 +194,6 @@ language guidance validation: PASS
 language files: 22
 language readmes: 22
 operational files: 11
-score: 100/100
 workspace validation: PASS
 ```
 
@@ -222,7 +232,9 @@ Each coding environment adapter also has a README:
 
 ## Project Status
 
-Current validation score: `100/100`.
+Current validation status: structural checks `PASS` (22 language files, 22
+language readmes, 11 operational files). This is a structural check, not a
+rubric score. Rubric scores are recorded per audit under `docs/workflow/`.
 
 See `docs/languages/score-report.md` for the score report and
 `docs/languages/scoring-rubric.md` for the rubric.

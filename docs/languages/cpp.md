@@ -14,6 +14,7 @@ projects.
 
 ```sh
 c++ --version
+cmake -S . -B build
 cmake --build build
 ctest --test-dir build
 clang-format -i path/to/file.cpp

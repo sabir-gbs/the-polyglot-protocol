@@ -24,6 +24,11 @@ Use immutable values where practical, validate boundaries, avoid shared mutable
 state, and keep exceptions meaningful. Use JUnit and the project's formatter or
 Spotless/Checkstyle setup.
 
+- Avoid deserializing untrusted data with `ObjectInputStream`. If you must, set an allow-list `ObjectInputFilter`; a pattern ending in `!*` rejects every other class.
+- Use `PreparedStatement` with `?` placeholders for SQL. Never concatenate input into the query.
+- When you do not need DTDs, reject DOCTYPE declarations in XML parsing to block XXE, for example by setting `http://apache.org/xml/features/disallow-doctype-decl` to true on `DocumentBuilderFactory`.
+- Do not log passwords, tokens, or keys.
+
 ## Source Documentation And Comments
 
 Use Javadoc for public classes, interfaces, records, methods, constructors, and

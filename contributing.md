@@ -18,7 +18,7 @@ Run:
 python scripts/validate-workspace.py
 ```
 
-Do not submit changes that reduce the validation score below `100/100`.
+Do not submit changes that make `python scripts/validate-workspace.py` fail.
 
 ## Style
 

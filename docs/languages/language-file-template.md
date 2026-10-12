@@ -32,3 +32,5 @@ kebab-case and do not include dates.
 - Include the 10 standard refactoring playbook items.
 - Include concise language-specific bad/good examples.
 - Avoid generic advice that could apply to any language without adjustment.
+- Require comments and docstrings in plain US English at about a 6th grade
+  reading level, as `docs/language-guidelines.md` states.
