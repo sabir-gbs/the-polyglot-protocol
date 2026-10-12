@@ -30,6 +30,13 @@ These change what a user of the protocol is told to do.
 - `docs/workflow/dev-workflow.md` has a new "Artifact-Group Dual-Auditor Gate"
   section, a new item in the final pass, and the audit workflow in its guidance
   priority list.
+- `docs/workflow/dev-workflow.md`, "Git And Release Controls": the rule to use
+  `GITHUB_PAT` strictly and to refuse cached credentials is replaced. Git and
+  GitHub operations now use `gh auth`, checked with `gh auth status`, and
+  personal access tokens are not used. The rule that a token is never written
+  into a remote, repository config, shell history, or document is kept.
+  Earlier audit logs still mention `GITHUB_PAT` because they record what was
+  true at the time.
 - `contributing.md`: "Do not submit changes that reduce the validation score
   below `100/100`" is now "Do not submit changes that make
   `python scripts/validate-workspace.py` fail". The validator has no score.
